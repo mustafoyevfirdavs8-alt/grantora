@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Grantora</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blush:#FBE6E8; --blush2:#F6D3D8; --rose:#E3A3AE; --rosegold:#B76E79;
+  --plum:#522336; --plum2:#7A4A5C; --cream:#FFFAF8; --gold:#C9A24D; --gold2:#E6C98A;
+  --ink:#3B1F2B; --muted:#8C6B77; --line:#F0D5DA; --ok:#5E9C7A;
+  --r:22px; --shadow:0 10px 30px rgba(122,74,92,.12);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:Manrope,system-ui,sans-serif;color:var(--ink);background:var(--cream);min-height:100vh;overflow-x:hidden}
+h1,h2,h3,.serif{font-family:"Cormorant Garamond",Georgia,serif;font-weight:700;color:var(--plum);margin:0}
+button{font-family:inherit}
+/* ---------- fon ---------- */
+.bg{position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,#FFF6F7 0%,#FBE6E8 55%,#F8DDE2 100%);overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(40px);opacity:.55;will-change:transform}
+.b1{width:260px;height:260px;background:#F5C6CF;top:-60px;right:-70px;animation:drift 18s ease-in-out infinite}
+.b2{width:220px;height:220px;background:#F3E1C2;bottom:80px;left:-80px;animation:drift 22s ease-in-out infinite reverse}
+.b3{width:180px;height:180px;background:#E9CFEA;top:40%;right:-60px;animation:drift 26s ease-in-out infinite}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,40px)}}
+.spark{position:absolute;width:6px;height:6px;border-radius:50%;background:var(--gold2);opacity:0;animation:twinkle 6s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:.9;transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.blob,.spark,.ring{animation:none!important}}
+/* ---------- umumiy ---------- */
+.wrap{max-width:520px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px 110px}
+.screen{display:none;animation:fade .35s ease}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:rgba(255,255,255,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--rosegold);font-weight:800}
+.muted{color:var(--muted)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:16px;padding:15px 18px;font-size:15px;font-weight:800;cursor:pointer;transition:transform .15s}
+.btn:active{transform:scale(.98)}
+.btn-main{background:linear-gradient(135deg,#C97C8A,#9E5468);color:#fff;box-shadow:0 8px 20px rgba(158,84,104,.3)}
+.btn-gold{background:linear-gradient(135deg,#E6C98A,#C9A24D);color:#4a3412}
+.btn-soft{background:#fff;color:var(--plum);border:1.5px solid var(--line)}
+.btn[disabled]{opacity:.55}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--plum2)}
+/* ---------- logo ---------- */
+.brand{display:flex;flex-direction:column;align-items:center;text-align:center}
+.emblem{position:relative;width:118px;height:118px;display:grid;place-items:center}
+.ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--gold2);animation:breathe 10s ease-in-out infinite}
+.ring.r2{inset:10px;border-color:#F0C9D0;animation-delay:-5s}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.06);opacity:.5}}
+.emblem-in{width:94px;height:94px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 8px 24px rgba(183,110,121,.25)}
+.wordmark{font-size:44px;line-height:1;margin-top:10px;letter-spacing:.01em}
+.tag{font-size:10.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--plum2);font-weight:700;margin-top:6px}
+/* ---------- forma ---------- */
+label.f{display:block;font-size:13px;font-weight:700;color:var(--plum2);margin:14px 0 6px}
+.inp{width:100%;border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:14px;font-size:16px;font-family:inherit;color:var(--ink);outline:none;transition:border .2s}
+.inp:focus{border-color:var(--rose)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font-size:13.5px;font-weight:700;color:var(--plum2);cursor:pointer}
+.chip.on{background:var(--plum);color:#fff;border-color:var(--plum)}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--muted);margin:16px 0 4px;line-height:1.45}
+.consent input{width:20px;height:20px;accent-color:var(--rosegold);flex:none;margin-top:1px}
+.err{color:#B4475B;font-size:13px;font-weight:700;min-height:18px;margin-top:8px}
+.phone-row{display:flex;gap:8px}
+.phone-row .inp{flex:1}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:10px 0}
+.or:before,.or:after{content:"";flex:1;height:1px;background:var(--line)}
+/* ---------- bosh sahifa ---------- */
+.hello{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.hello h2{font-size:26px}
+.mini-logo{width:44px;height:44px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:var(--shadow)}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#F7D2D9 0%,#FBE9EC 55%,#F7E6CF 100%);border:1px solid #F2CBD3}
+.hero h1{font-size:30px;line-height:1.05;margin:8px 0 8px}
+.hero p{margin:0 0 14px;font-size:14px;line-height:1.5;color:var(--plum2)}
+.hero .deco{position:absolute;right:-26px;top:-26px;width:130px;height:130px;opacity:.18}
+.count{display:flex;gap:8px;margin:4px 0 14px}
+.count div{flex:1;background:#fff;border-radius:14px;padding:10px 4px;text-align:center;border:1px solid var(--line)}
+.count b{display:block;font-family:"Cormorant Garamond",serif;font-size:26px;color:var(--plum);line-height:1}
+.count span{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow);cursor:pointer;text-align:left;width:100%}
+.tile .ic{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:20px;margin-bottom:10px}
+.tile b{display:block;font-size:15px;color:var(--plum)}
+.tile small{color:var(--muted);font-size:12px;line-height:1.35;display:block;margin-top:3px}
+.ic.p{background:#FBE1E6}.ic.g{background:#F8EBD0}.ic.l{background:#EFE2F4}.ic.m{background:#E3F0EA}
+.teacher{display:flex;gap:14px;align-items:center}
+.avatar{width:76px;height:76px;border-radius:50%;flex:none;background:linear-gradient(135deg,#F3C1CB,#E6C98A);display:grid;place-items:center;font-family:"Cormorant Garamond",serif;font-size:34px;font-weight:700;color:#fff;border:3px solid #fff;box-shadow:var(--shadow);background-size:cover;background-position:center}
+.stats{display:flex;gap:8px;margin-top:14px}
+.stats div{flex:1;text-align:center;background:var(--blush);border-radius:14px;padding:10px 4px}
+.stats b{display:block;color:var(--plum);font-size:18px}
+.stats span{font-size:11px;color:var(--muted);font-weight:600}
+.list{list-style:none;padding:0;margin:10px 0 0}
+.list li{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px;line-height:1.45}
+.list li:last-child{border:0}
+.list .dot{flex:none;width:24px;height:24px;border-radius:50%;background:var(--blush);display:grid;place-items:center;font-size:12px}
+.sec-title{font-size:24px;margin:6px 0 4px}
+.sub{font-size:13.5px;color:var(--muted);margin:0 0 14px;line-height:1.5}
+/* ---------- qo'llanma ---------- */
+.res{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)}
+.res:last-child{border:0}
+.res .n{flex:none;width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#F3C1CB,#E7B0BB);color:#fff;font-weight:800;display:grid;place-items:center}
+.res b{display:block;color:var(--plum);font-size:15px}
+.res p{margin:3px 0 0;font-size:13px;color:var(--muted);line-height:1.45}
+.acc{border:1px solid var(--line);border-radius:16px;background:#fff;margin-bottom:10px;overflow:hidden}
+.acc summary{list-style:none;padding:14px 16px;font-weight:800;color:var(--plum);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:14.5px}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary:after{content:"+";font-size:20px;color:var(--rosegold)}
+.acc[open] summary:after{content:"–"}
+.acc .body{padding:0 16px 14px;font-size:13.5px;line-height:1.55;color:var(--ink)}
+.note{font-size:12.5px;color:var(--plum2);background:#FFF3E3;border:1px solid #F3DDB5;border-radius:14px;padding:12px;line-height:1.5}
+/* ---------- test ---------- */
+.qprog{height:6px;background:var(--line);border-radius:9px;overflow:hidden;margin:6px 0 16px}
+.qprog i{display:block;height:100%;background:linear-gradient(90deg,#E3A3AE,#C9A24D);transition:width .3s}
+.qq{font-family:"Cormorant Garamond",serif;font-size:23px;font-weight:700;color:var(--plum);line-height:1.2;margin-bottom:14px}
+.opt{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;font-size:14.5px;font-weight:700;color:var(--plum2);cursor:pointer}
+.opt:active{background:var(--blush)}
+.result-badge{font-size:46px;text-align:center}
+/* ---------- pullik ---------- */
+.price{background:linear-gradient(135deg,#522336,#7A4A5C);color:#fff;border:0}
+.price h2{color:#fff;font-size:28px}
+.price .amt{font-family:"Cormorant Garamond",serif;font-size:38px;font-weight:700;color:var(--gold2);margin:6px 0}
+.price ul{padding-left:0;list-style:none;margin:10px 0 16px}
+.price li{padding:5px 0;font-size:14px;opacity:.95}
+.day{display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;background:#fff;border:1px solid var(--line);margin-bottom:8px}
+.day .d{flex:none;width:46px;height:46px;border-radius:14px;background:var(--blush);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--plum)}
+.day .d small{font-size:9px;font-weight:800;letter-spacing:.1em}
+.day .d b{font-size:17px;line-height:1}
+.day .t{flex:1;font-size:13.5px;font-weight:700;color:var(--plum)}
+.day .t span{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:2px}
+.lock{font-size:16px;opacity:.6}
+/* ---------- profil ---------- */
+.kv{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.kv:last-child{border:0}
+.kv span{color:var(--muted)}
+.kv b{color:var(--plum);text-align:right}
+.disc{flex:none;background:linear-gradient(135deg,#E6C98A,#C9A24D);color:#4a3412;font-weight:800;border-radius:999px;padding:6px 12px;font-size:14px}
+.goal-h{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--plum2);margin-top:4px}
+.goal-h b{color:var(--plum)}
+.goal .qprog{margin:6px 0 12px}
+.friends{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.friends span{background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:700;color:var(--plum2)}
+.friends span.p{background:#EAF4EE;border-color:#CFE6D8;color:#3E7A59}
+.my-disc{display:none;margin:-4px 0 14px;text-align:center;font-weight:800;color:var(--gold2);font-size:14px}
+.old:empty{display:none}
+.promo-price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.promo-price .old{font-size:15px;color:var(--plum2);margin:0}
+.promo-price .new{font-family:"Cormorant Garamond",serif;font-size:32px;font-weight:700;color:var(--plum)}
+.off{background:#B4475B;color:#fff;font-size:12px;font-weight:800;border-radius:999px;padding:4px 9px}
+.off:empty{display:none}
+.startline{font-size:12.5px;font-weight:700;color:var(--plum2);text-align:center;margin:-4px 0 12px}
+.startline:empty{display:none}
+.promo-mini{display:flex;justify-content:center;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#B4475B;margin-top:6px}
+.promo-mini:empty{display:none}
+textarea.inp{min-height:110px;resize:vertical}
+.old{text-decoration:line-through;opacity:.6;margin-right:10px;font-size:16px;font-weight:700}
+.pay-sum{text-align:center}
+.pay-sum .big{font-family:"Cormorant Garamond",serif;font-size:40px;font-weight:700;color:var(--plum)}
+.step{display:flex;align-items:center;gap:10px;margin-bottom:12px;color:var(--plum);font-size:15px}
+.sn{flex:none;width:28px;height:28px;border-radius:50%;background:var(--plum);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:800}
+.cardbox{position:relative;border-radius:18px;padding:18px;color:#fff;background:linear-gradient(135deg,#C97C8A 0%,#9E5468 55%,#7A4A5C 100%);box-shadow:0 12px 26px rgba(122,74,92,.3);overflow:hidden;min-height:150px}
+.cardbox:after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.12)}
+.cb-chip{width:38px;height:28px;border-radius:6px;background:linear-gradient(135deg,#F3DFA8,#C9A24D);margin-bottom:22px}
+.cb-num{font-size:21px;font-weight:800;letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.cb-holder{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.9;margin-top:8px}
+.cb-logo{position:absolute;right:16px;bottom:14px;width:46px;height:38px;opacity:.9;filter:brightness(4)}
+.upload{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:2px dashed var(--rose);border-radius:18px;padding:22px;background:#FFF8F9;color:var(--plum2);font-weight:800;cursor:pointer;margin-bottom:6px;text-align:center}
+.upload img{max-width:100%;max-height:260px;border-radius:12px}
+.state{border-radius:20px;padding:16px 18px;margin-bottom:14px;border:1px solid}
+.state h3{font-size:22px;margin-bottom:4px}
+.state p{margin:0;font-size:13.5px;line-height:1.5}
+.st-wait{background:#FFF6E6;border-color:#F3DDB5}
+.st-no{background:#FCE9EC;border-color:#F2C3CC}
+.st-ok{background:linear-gradient(135deg,#EAF5EE,#FBF1E2);border-color:#CFE6D8}
+.day.open{cursor:pointer}
+.day.done{background:#F2FAF5;border-color:#CFE6D8}
+.day .chk{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:13px;color:#fff;flex:none}
+.day.done .chk{background:var(--ok);border-color:var(--ok)}
+.demo{font-size:11.5px;color:var(--muted);text-align:center;margin-top:10px}
+.demo a{color:var(--rosegold);font-weight:800;cursor:pointer}
+.ref{display:flex;gap:8px;align-items:center;background:var(--blush);border-radius:14px;padding:10px 12px;font-size:12.5px;word-break:break-all;color:var(--plum2)}
+/* ---------- pastki menyu ---------- */
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));width:calc(100% - 24px);max-width:500px;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:24px;display:none;padding:6px;box-shadow:0 12px 30px rgba(82,35,54,.15);z-index:20}
+.tabs.on{display:flex}
+.tab{flex:1;border:0;background:none;border-radius:18px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:800;color:var(--muted);cursor:pointer}
+.tab .ti{font-size:19px;line-height:1}
+.tab.on{background:var(--blush);color:var(--plum)}
+.toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-80px);background:var(--plum);color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;font-weight:700;z-index:50;transition:transform .3s;max-width:90%;text-align:center}
+.toast.on{transform:translate(-50%,0)}
+.center{text-align:center}
+.mt{margin-top:12px}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <i class="spark" style="top:12%;left:18%;animation-delay:0s"></i>
+  <i class="spark" style="top:30%;left:82%;animation-delay:1.5s"></i>
+  <i class="spark" style="top:62%;left:12%;animation-delay:3s"></i>
+  <i class="spark" style="top:78%;left:70%;animation-delay:4.5s"></i>
+</div>
+
+<!-- logo emblemasi (qayta ishlatiladi) -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="rg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E9B3BC"/><stop offset=".55" stop-color="#B76E79"/><stop offset="1" stop-color="#C9A24D"/>
+    </linearGradient>
+    <symbol id="emb" viewBox="0 0 100 80">
+      <g fill="none" stroke="url(#rg)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M54 14 L92 28 L54 42 L16 28 Z" fill="url(#rg)" fill-opacity=".12"/>
+        <path d="M30 33 V48 C30 55 78 55 78 48 V33"/>
+        <path d="M92 28 V46"/><circle cx="92" cy="49" r="2.6" fill="url(#rg)"/>
+        <path d="M30 38 C18 30 10 22 6 10 C16 18 24 22 32 24"/>
+        <path d="M28 44 C14 40 6 32 2 20 C12 28 20 32 30 32"/>
+        <path d="M30 50 C18 50 10 44 5 34 C14 40 22 42 30 42"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="toast" id="toast"></div>
+
+<div class="wrap">
+
+  <!-- ===== 1. RO'YXATDAN O'TISH ===== -->
+  <section class="screen" id="s-reg">
+    <div class="brand" style="margin:10px 0 18px">
+      <div class="emblem"><div class="ring"></div><div class="ring r2"></div>
+        <div class="emblem-in"><svg width="64" height="52"><use href="#emb"/></svg></div></div>
+      <div class="wordmark serif">Grantora</div>
+      <div class="tag">Grants &amp; Certificates</div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Xush kelibsiz</div>
+      <h2 style="font-size:25px;margin:6px 0 4px">Ro'yxatdan o'ting</h2>
+      <p class="sub" style="margin:0">Bepul qo'llanma va kurs haqidagi to'liq ma'lumot ro'yxatdan o'tgandan keyin ochiladi.</p>
+
+      <label class="f" for="r-name">Ism va familiya</label>
+      <input class="inp" id="r-name" autocomplete="name" placeholder="Masalan: Madina Karimova">
+
+      <label class="f" for="r-phone">Telefon raqam</label>
+      <button class="btn btn-soft" id="r-contact" type="button">📱 Telegram raqamimni yuborish</button>
+      <div class="or">yoki qo'lda yozing</div>
+      <input class="inp" id="r-phone" type="tel" inputmode="tel" placeholder="+998 90 123 45 67">
+
+      <label class="f" for="r-uni">Qayerda o'qiysiz? <span class="muted" style="font-weight:500">(ixtiyoriy)</span></label>
+      <input class="inp" id="r-uni" placeholder="Masalan: O'zMU, TDIU, Westminster…">
+
+      <label class="f">Bosqichingiz</label>
+      <div class="chips" id="r-stage">
+        <button class="chip" type="button">1-kurs</button><button class="chip" type="button">2-kurs</button>
+        <button class="chip" type="button">3-kurs</button><button class="chip" type="button">4-kurs</button>
+        <button class="chip" type="button">Magistratura</button><button class="chip" type="button">Bitirganman</button>
+      </div>
+
+      <label class="consent"><input type="checkbox" id="r-ok">
+        <span>Ma'lumotlarim kurs bo'yicha bog'lanish uchun Grantora jamoasiga yuborilishiga roziman.</span></label>
+      <div class="err" id="r-err"></div>
+      <button class="btn btn-main mt" id="r-send">Ro'yxatdan o'tish ✨</button>
+    </div>
+  </section>
+
+  <!-- ===== 2. BOSH SAHIFA ===== -->
+  <section class="screen" id="s-home">
+    <div class="hello">
+      <div><div class="eyebrow">Salom</div><h2 id="h-name">Go'zal</h2></div>
+      <div class="mini-logo"><svg width="32" height="26"><use href="#emb"/></svg></div>
+    </div>
+
+    <div class="card hero">
+      <svg class="deco" viewBox="0 0 100 80"><use href="#emb"/></svg>
+      <span class="pill">🎓 10 kunlik online kurs</span>
+      <h1 class="serif">Grant va xalqaro sertifikatlar sari 10 kun</h1>
+      <p>Talaba qizlar uchun: xalqaro CV, motivatsion xat, bepul sertifikatlar va shaxsiy grant rejasi.</p>
+      <div class="promo-price"><span class="old" id="h-old"></span><span class="new" id="h-new"></span><span class="off" id="h-off"></span></div>
+      <div id="cd-wrap">
+        <div class="eyebrow" style="margin-bottom:6px" id="cd-label">🔥 Chegirma tugashiga qoldi</div>
+        <div class="count"><div><b id="cd-d">0</b><span>kun</span></div><div><b id="cd-h">0</b><span>soat</span></div><div><b id="cd-m">0</b><span>daqiqa</span></div><div><b id="cd-s">0</b><span>soniya</span></div></div>
+      </div>
+      <div class="startline" id="h-start"></div>
+      <button class="btn btn-main" data-pay>Kursga yozilish</button>
+    </div>
+
+    <div class="grid2">
+      <button class="tile" data-go="free"><div class="ic p">🎁</div><b>Bepul qo'llanma</b><small>Kursdan keyin qanday natijaga erishasiz</small></button>
+      <button class="tile" data-go="quiz"><div class="ic g">🧭</div><b>Mini test</b><small>Qaysi yo'l sizga mos? 1 daqiqa</small></button>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Ustoz haqida</div>
+      <div class="teacher mt">
+        <div class="avatar" id="t-ava"></div>
+        <div><h3 style="font-size:24px" id="t-name"></h3><div class="muted" style="font-size:13px;margin-top:2px" id="t-role"></div></div>
+      </div>
+      <p style="font-size:14px;line-height:1.55;margin:12px 0 0" id="t-bio"></p>
+      <div class="stats" id="t-stats"></div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">Kurs haqida</div>
+      <h3 style="font-size:23px;margin-top:6px">Nimalarni o'rganasiz?</h3>
+      <ul class="list">
+        <li><span class="dot">🌍</span><span>Grant va stipendiyalarni qayerdan, qanday topish va firibgarlardan himoyalanish</span></li>
+        <li><span class="dot">📜</span><span>Coursera, edX, Google kabi platformalarda xalqaro sertifikat olish, pullik kursni bepul olish yo'llari</span></li>
+        <li><span class="dot">📝</span><span>Xalqaro standartdagi CV va motivatsion xat yozish</span></li>
+        <li><span class="dot">🗣</span><span>Til sertifikatiga reja va intervyuga tayyorgarlik</span></li>
+      </ul>
+      <div class="stats"><div><b>10</b><span>kun</span></div><div><b>Online</b><span>format</span></div><div><b>Amaliy</b><span>vazifalar</span></div></div>
+    </div>
+  </section>
+
+  <!-- ===== 3. BEPUL QO'LLANMA ===== -->
+  <section class="screen" id="s-free">
+    <div class="eyebrow">Bepul qo'llanma</div>
+    <h2 class="sec-title">Kursdan keyin nimaga ega bo'lasiz?</h2>
+    <p class="sub">10 kundan so'ng qo'lingizda bo'ladigan aniq natijalar. Har birini kurs davomida bosqichma-bosqich birga tayyorlaymiz.</p>
+
+    <div class="card" style="padding:6px 18px">
+      <div class="res"><div class="n">1</div><div><b>Xalqaro standartdagi CV</b><p>Europass yoki akademik formatda, grant komissiyasi kutgan tuzilmada tayyor CV.</p></div></div>
+      <div class="res"><div class="n">2</div><div><b>Motivatsion xat qoralamasi</b><p>Sizning hikoyangiz asosida yozilgan, tuzilmasi to'g'ri va xatolardan tozalangan xat.</p></div></div>
+      <div class="res"><div class="n">3</div><div><b>Boshlangan xalqaro sertifikatlar</b><p>Kamida bitta xalqaro platformada kursni boshlagan bo'lasiz. Pullik kursni moliyaviy yordam orqali bepul olishni ham amalda o'rganasiz.</p></div></div>
+      <div class="res"><div class="n">4</div><div><b>Shaxsiy grant xaritasi</b><p>Sizga mos dasturlar, talablar va dedlaynlar yozilgan shaxsiy jadval.</p></div></div>
+      <div class="res"><div class="n">5</div><div><b>Til sertifikati rejasi</b><p>IELTS, TOEFL yoki Duolingo: qaysi biri sizga kerak va qanday tayyorlanish rejasi.</p></div></div>
+      <div class="res"><div class="n">6</div><div><b>Intervyuga tayyorlik</b><p>Ko'p beriladigan savollar va sinov intervyusi orqali o'zingizga ishonch.</p></div></div>
+    </div>
+
+    <h3 style="font-size:22px;margin:18px 0 10px">Hoziroq foydali 3 maslahat</h3>
+    <details class="acc" open><summary>💡 Pullik kursni bepul olish mumkin</summary>
+      <div class="body">Coursera kabi platformalarda <b>Financial Aid</b> (moliyaviy yordam) arizasi bor. Uni to'g'ri to'ldirsangiz, pullik kurs va uning sertifikatini bepul olishingiz mumkin. Kursda arizani birga to'ldiramiz.</div></details>
+    <details class="acc"><summary>🛡 Firibgarlardan ehtiyot bo'ling</summary>
+      <div class="body">Haqiqiy grant uchun "kafolat puli" yoki "joy band qilish to'lovi" so'ralmaydi. Har doim dasturning rasmiy saytini tekshiring.</div></details>
+    <details class="acc"><summary>📅 Dedlaynlarni bitta jadvalga yozing</summary>
+      <div class="body">Ko'p qizlar grantni bilimi yetmagani uchun emas, dedlaynni o'tkazib yuborgani uchun boy beradi. Dastur nomi, talablar va oxirgi sanani bitta jadvalda yuriting.</div></details>
+
+    <div class="note mt">Halol gap: hech kim grant yutishni kafolatlay olmaydi. Lekin kurs oxirida arizani topshirishga to'liq tayyor bo'lasiz.</div>
+
+    <div class="card mt center">
+      <h3 style="font-size:22px">Qaysi yo'l sizga mos?</h3>
+      <p class="sub" style="margin:6px 0 12px">5 ta savolga javob bering va shaxsiy tavsiya oling.</p>
+      <button class="btn btn-gold" data-go="quiz">🧭 Mini testni boshlash</button>
+    </div>
+  </section>
+
+  <!-- ===== 4. MINI TEST ===== -->
+  <section class="screen" id="s-quiz">
+    <div class="card">
+      <div class="eyebrow" id="q-step">1 / 5</div>
+      <div class="qprog"><i id="q-bar" style="width:20%"></i></div>
+      <div id="q-box"></div>
+    </div>
+  </section>
+
+  <!-- ===== 5. PULLIK KURS ===== -->
+  <section class="screen" id="s-paid">
+    <!-- holat banneri: kutilmoqda / rad etildi / ochildi -->
+    <div id="p-state"></div>
+
+    <div class="card price" id="p-offer">
+      <div class="eyebrow" style="color:var(--gold2)">To'liq kurs</div>
+      <h2 class="serif">Grantora: 10 kunlik intensiv</h2>
+      <div><span class="old" id="p-old"></span><span class="amt" id="p-price"></span></div>
+      <div class="my-disc" id="p-disc"></div>
+      <div class="promo-mini" id="p-promo" style="color:var(--gold2)"></div>
+      <ul>
+        <li>✦ 10 ta jonli dars va yozib olingan videolar</li>
+        <li>✦ Har kuni amaliy vazifa va shaxsiy tekshiruv</li>
+        <li>✦ Yopiq Telegram guruh va savol-javob</li>
+        <li>✦ CV va motivatsion xatni ustoz tekshiradi</li>
+        <li>✦ Kurs oxirida Grantora sertifikati</li>
+      </ul>
+      <button class="btn btn-gold" data-pay>Kursga yozilish 🔥</button>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 10px">
+      <h3 style="font-size:22px">10 kunlik dastur</h3><span class="muted" style="font-size:12.5px;font-weight:700" id="p-prog"></span>
+    </div>
+    <div id="days"></div>
+    <button class="btn btn-soft mt" id="p-admin">💬 Admin bilan yozishish</button>
+  </section>
+
+  <!-- ===== 5b. TO'LOV ===== -->
+  <section class="screen" id="s-pay">
+    <div class="eyebrow">To'lov</div>
+    <h2 class="sec-title">Kursga yozilish</h2>
+    <p class="sub">3 qadam: kartaga o'tkazing, chekni yuklang, tasdiqlashni kuting. Odatda bir necha soat ichida tasdiqlanadi.</p>
+
+    <div class="card pay-sum">
+      <div class="muted" style="font-size:13px;font-weight:700">To'lanadigan summa</div>
+      <div><span class="old" id="y-old"></span><span class="big" id="y-amt"></span></div>
+      <div class="my-disc" id="y-disc" style="color:var(--rosegold)"></div>
+      <div class="promo-mini" id="y-promo"></div>
+    </div>
+
+    <div class="card">
+      <div class="step"><span class="sn">1</span><b>Shu kartaga o'tkazing</b></div>
+      <div class="cardbox">
+        <div class="cb-chip"></div>
+        <div class="cb-num" id="y-card"></div>
+        <div class="cb-holder" id="y-holder"></div>
+        <svg class="cb-logo" viewBox="0 0 100 80"><use href="#emb"/></svg>
+      </div>
+      <button class="btn btn-soft mt" id="y-copy">📋 Karta raqamini nusxalash</button>
+      <p class="muted" style="font-size:12.5px;margin:10px 0 0;line-height:1.5">Payme, Click, Uzum yoki istalgan bank ilovasidan o'tkazishingiz mumkin. Summani aynan yuqoridagidek yuboring.</p>
+    </div>
+
+    <div class="card">
+      <div class="step"><span class="sn">2</span><b>Chek rasmini yuklang</b></div>
+      <label class="upload" id="y-drop">
+        <input type="file" id="y-file" accept="image/*" hidden>
+        <img id="y-prev" alt="" hidden>
+        <span id="y-ph">📎 Chek skrinshotini tanlash</span>
+      </label>
+      <div class="err" id="y-err"></div>
+      <button class="btn btn-main" id="y-send" disabled>Chekni yuborish</button>
+    </div>
+
+    <div class="card" style="padding:14px 18px">
+      <div class="step" style="margin:0"><span class="sn">3</span><b>Tasdiqlashni kuting</b></div>
+      <p class="muted" style="font-size:12.5px;margin:8px 0 0;line-height:1.5">Admin chekni tekshiradi. Tasdiqlangach, bot sizga xabar yuboradi va pullik bo'lim ochiladi.</p>
+    </div>
+  </section>
+
+  <!-- ===== 6. PROFIL ===== -->
+  <section class="screen" id="s-me">
+    <div class="eyebrow">Profil</div>
+    <h2 class="sec-title" id="m-name"></h2>
+    <div class="card" id="m-info"></div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <h3 style="font-size:21px">Dugonalarni taklif qiling 💌</h3>
+        <span class="disc" id="m-disc">0%</span>
+      </div>
+      <p class="sub" style="margin:6px 0 12px" id="m-rules"></p>
+      <div class="goal">
+        <div class="goal-h"><span>👭 Ro'yxatdan o'tganlar</span><b id="g1-t">0/10</b></div>
+        <div class="qprog"><i id="g1-b" style="width:0"></i></div>
+        <div class="goal-h"><span>💎 To'lov qilganlar</span><b id="g2-t">0/1</b></div>
+        <div class="qprog"><i id="g2-b" style="width:0"></i></div>
+      </div>
+      <div id="m-refs"></div>
+      <div class="ref mt"><span id="m-ref" style="flex:1"></span></div>
+      <button class="btn btn-main mt" id="m-share">Havolani ulashish</button>
+    </div>
+    <button class="btn btn-soft" id="m-edit">✏️ Ma'lumotlarni o'zgartirish</button>
+
+    <div class="card mt" id="fb">
+      <div class="eyebrow">Admin bilan bog'lanish</div>
+      <h3 style="font-size:21px;margin:6px 0 4px">Taklif, shikoyat yoki savol 💬</h3>
+      <p class="sub" style="margin:0 0 12px">Fikringiz biz uchun muhim. Xabaringiz to'g'ridan-to'g'ri adminga boradi va tez orada javob olasiz.</p>
+      <div class="chips" id="fb-kind">
+        <button class="chip on" type="button" data-k="taklif">💡 Taklif</button>
+        <button class="chip" type="button" data-k="shikoyat">⚠️ Shikoyat</button>
+        <button class="chip" type="button" data-k="savol">❓ Savol</button>
+      </div>
+      <textarea class="inp mt" id="fb-text" maxlength="1500" placeholder="Xabaringizni yozing…"></textarea>
+      <div class="err" id="fb-err"></div>
+      <button class="btn btn-main" id="fb-send">Yuborish</button>
+      <button class="btn btn-soft mt" id="fb-tg">✉️ Adminga Telegramda yozish</button>
+    </div>
+  </section>
+
+</div>
+
+<nav class="tabs" id="tabs">
+  <button class="tab" data-go="home"><span class="ti">🏠</span>Bosh sahifa</button>
+  <button class="tab" data-go="free"><span class="ti">🎁</span>Bepul</button>
+  <button class="tab" data-go="paid"><span class="ti">💎</span>Kurs</button>
+  <button class="tab" data-go="me"><span class="ti">👤</span>Profil</button>
+</nav>
+
+<script>
+/* ================= SOZLAMALAR (shu yerni o'zgartirasiz) ================= */
+const CONFIG = {
+  API_URL: 'https://grantora-bot.mustafoyevfirdavs8.workers.dev', // bot serveri (Cloudflare Worker)
+  BOT_USERNAME: 'grantora_bot',    // bot: @grantora_bot
+  ADMIN_USERNAME: '',              // admin Telegram nik (@ belgisisiz); bo'sh bo'lsa tugma ko'rinmaydi
+  // Narx va karta aslida serverdan (worker.js) keladi; bu yerdagilar server javob berguncha ko'rinadi
+  PRICE: 300000,                                   // asl narx
+  PROMO_PRICE: 99990,                              // aksiya narxi
+  PROMO_END: '2026-11-30T23:59:59+05:00',          // aksiya tugashi
+  CARD: { number: '5614 6887 0186 6740', holder: 'MAMAZIYOYEVA DIYORA' },
+  NEXT_START: '2026-12-05T10:00:00+05:00', // kurs boshlanishi
+  TEACHER: {
+    name: 'Diyora',
+    role: 'Grantora asoschisi, ustoz',
+    photo: 'data:image/jpeg;base64,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', // ustoz rasmi
+    bio: 'Bu yerga ustozning qisqacha tarixi yoziladi: qaysi grant va sertifikatlarni olgan, nechta talabaga yordam bergan va nega bu kursni ochgan.',
+    stats: [['100+','talaba'],['100+','sertifikat'],['10+','grant']]
+  },
+  DAYS: [
+    ['Grant va stipendiya turlari','Maqsad qo\'yish, 3 ta mos dastur'],
+    ['Grantni qidirish va firibgarlardan himoya','Shaxsiy grant jadvali'],
+    ['Online sertifikat platformalari','Platformalarda ro\'yxatdan o\'tish'],
+    ['Pullik kursni bepul olish','Financial Aid arizasi'],
+    ['Xalqaro CV','Tayyor CV'],
+    ['Motivatsion xat','Xat qoralamasi'],
+    ['Tavsiyanoma va hujjatlar','Hujjatlar ro\'yxati'],
+    ['Til sertifikatlari','Tayyorgarlik rejasi'],
+    ['Intervyu','Sinov intervyusi'],
+    ['Yakuniy dars','Ariza va keyingi 3 oy rejasi']
+  ]
+};
+
+/* ================= TELEGRAM ================= */
+const tg = window.Telegram && window.Telegram.WebApp;
+const inTG = !!(tg && tg.initData);
+const tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || null;
+if (tg) { try { tg.ready(); tg.expand(); tg.setHeaderColor('#FFF6F7'); tg.setBackgroundColor('#FFFAF8'); } catch(e){} }
+const haptic = t => { try { tg.HapticFeedback.impactOccurred(t||'light'); } catch(e){} };
+
+/* ================= SAQLASH ================= */
+const mem = {};
+const store = {
+  get(k){ try { const v = localStorage.getItem('gr_'+k); return v ? JSON.parse(v) : (mem[k]||null); } catch(e){ return mem[k]||null; } },
+  set(k,v){ mem[k]=v; try { localStorage.setItem('gr_'+k, JSON.stringify(v)); } catch(e){}
+    try { if (tg && tg.CloudStorage) tg.CloudStorage.setItem('gr_'+k, JSON.stringify(v)); } catch(e){} }
+};
+function cloudLoad(k){ return new Promise(res=>{
+  try { if (!(tg && tg.CloudStorage && inTG)) return res(null);
+    tg.CloudStorage.getItem('gr_'+k,(err,v)=>{ try{ res(!err&&v?JSON.parse(v):null);}catch(e){res(null);} }); }
+  catch(e){ res(null); } }); }
+
+/* ================= SERVER ================= */
+async function send(type, data){
+  const base = CONFIG.API_URL || (/^https?:/.test(location.protocol) && !/claude/.test(location.hostname) ? location.origin : '');
+  if (!base || !inTG) return { ok:true, demo:true };
+  try {
+    const r = await fetch(base.replace(/\/$/,'') + '/api/lead', {
+      method:'POST', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ initData: tg.initData, type, data })
+    });
+    return await r.json();
+  } catch(e){ return { ok:false, error:'network' }; }
+}
+
+/* ================= YORDAMCHI ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove('on'),2600); }
+function normPhone(p){ let d=String(p||'').replace(/\D/g,''); if(d.length===9) d='998'+d; return d.length>=11 ? '+'+d : ''; }
+
+/* ================= EKRANLAR ================= */
+let current = '';
+const order = ['home','free','paid','me'];
+function go(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on', s.id==='s-'+name));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on', t.dataset.go===(name==='pay'?'paid':name)));
+  if (name==='paid'){ renderPaid(); if (store.get('user')) loadRefs(); }
+  $('#tabs').classList.toggle('on', name!=='reg');
+  current = name; window.scrollTo(0,0);
+  if (name==='quiz') startQuiz();
+  if (name==='me') renderMe();
+  try { if (tg && tg.BackButton){ (name==='home'||name==='reg') ? tg.BackButton.hide() : tg.BackButton.show(); } } catch(e){}
+}
+document.addEventListener('click', e=>{ const b=e.target.closest('[data-go]'); if(b){ haptic(); go(b.dataset.go); } });
+try { tg && tg.BackButton.onClick(()=>go(current==='pay'?'paid':'home')); } catch(e){}
+
+/* ================= RO'YXATDAN O'TISH ================= */
+let stage = '';
+$('#r-stage').addEventListener('click', e=>{ const c=e.target.closest('.chip'); if(!c) return;
+  document.querySelectorAll('#r-stage .chip').forEach(x=>x.classList.remove('on')); c.classList.add('on'); stage=c.textContent; haptic(); });
+
+$('#r-contact').addEventListener('click', ()=>{
+  if (!(tg && tg.requestContact)) { toast('Raqamni qo\'lda yozing'); $('#r-phone').focus(); return; }
+  try {
+    tg.requestContact((ok, res)=>{
+      const c = res && res.responseUnsafe && res.responseUnsafe.contact;
+      if (ok && c && c.phone_number){ $('#r-phone').value = normPhone(c.phone_number); toast('Raqam olindi ✅'); }
+      else if (ok) toast('Raqam yuborildi ✅');
+      else toast('Raqamni qo\'lda yozing');
+    });
+  } catch(e){ toast('Raqamni qo\'lda yozing'); }
+});
+
+$('#r-send').addEventListener('click', async ()=>{
+  const name = $('#r-name').value.trim(), phone = normPhone($('#r-phone').value), uni = $('#r-uni').value.trim();
+  const err = $('#r-err'); err.textContent='';
+  if (name.length < 3) return err.textContent = 'Ism va familiyangizni yozing';
+  if (!phone) return err.textContent = 'Telefon raqamni to\'g\'ri yozing';
+  if (!$('#r-ok').checked) return err.textContent = 'Rozilik belgisini qo\'ying';
+  const btn = $('#r-send'); btn.disabled = true; btn.textContent = 'Yuborilmoqda…';
+  const prev = store.get('user');
+  const user = { name, phone, uni, stage, at: Date.now() };
+  const r = await send(prev ? 'update' : 'register', user);
+  btn.disabled = false; btn.textContent = 'Ro\'yxatdan o\'tish ✨';
+  if (!r.ok) return err.textContent = 'Internet bilan muammo. Qayta urinib ko\'ring.';
+  store.set('user', user); haptic('medium');
+  // bot foydalanuvchiga xabar yubora olishi uchun (taklif va chegirma xabarlari)
+  try { if (!prev && tg && tg.requestWriteAccess) tg.requestWriteAccess(()=>{}); } catch(e){}
+  toast(prev ? 'Ma\'lumotlar yangilandi ✅' : 'Xush kelibsiz, ' + name.split(' ')[0] + '! 🌸');
+  fillHome(); go('home');
+});
+
+/* ================= BOSH SAHIFA ================= */
+function fillHome(){
+  const u = store.get('user'); $('#h-name').textContent = u ? u.name.split(' ')[0] : 'Go\'zal';
+  const T = CONFIG.TEACHER;
+  $('#t-name').textContent = T.name; $('#t-role').textContent = T.role; $('#t-bio').textContent = T.bio;
+  const av = $('#t-ava');
+  if (T.photo) { av.style.backgroundImage = 'url("'+T.photo+'")'; av.textContent=''; } else av.textContent = T.name.charAt(0);
+  $('#t-stats').innerHTML = T.stats.map(s=>'<div><b>'+esc(s[0])+'</b><span>'+esc(s[1])+'</span></div>').join('');
+  renderPaid();
+}
+const MONTHS = ['yanvar','fevral','mart','aprel','may','iyun','iyul','avgust','sentabr','oktabr','noyabr','dekabr'];
+const uzDate = iso => { const d = new Date(iso); return d.getDate()+'-'+MONTHS[d.getMonth()]; };
+const promoOn = () => Date.now() < new Date(CONFIG.PROMO_END).getTime();
+function tick(){
+  const promo = promoOn(), target = promo ? CONFIG.PROMO_END : CONFIG.NEXT_START;
+  const ms = new Date(target) - Date.now(), w = $('#cd-wrap');
+  if (ms <= 0){ w.style.display='none'; }
+  else {
+    w.style.display='block';
+    $('#cd-label').textContent = promo ? '🔥 Chegirma tugashiga qoldi' : 'Kurs boshlanishiga qoldi';
+    $('#cd-d').textContent = Math.floor(ms/864e5); $('#cd-h').textContent = Math.floor(ms/36e5)%24;
+    $('#cd-m').textContent = Math.floor(ms/6e4)%60; $('#cd-s').textContent = Math.floor(ms/1e3)%60;
+  }
+  $('#h-start').textContent = promo ? '🎓 Kurs '+uzDate(CONFIG.NEXT_START)+' kuni boshlanadi · chegirma '+uzDate(CONFIG.PROMO_END)+'gacha' : '';
+  // to'lov va kurs sahifalaridagi kichik taymer
+  let t = '';
+  if (promo){ const d=Math.floor(ms/864e5), h=Math.floor(ms/36e5)%24, m=Math.floor(ms/6e4)%60, s=Math.floor(ms/1e3)%60;
+    t = '⏰ Chegirma tugashiga: '+(d?d+' kun ':'')+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+  $('#y-promo').textContent = t; $('#p-promo').textContent = t;
+  // aksiya tugashi bilan narxlarni yangilash
+  if (tick.wasPromo !== undefined && tick.wasPromo !== promo){ renderPaid(); renderPay(); }
+  tick.wasPromo = promo;
+}
+function renderHeroPrice(){
+  const p = payInfo();
+  $('#h-old').textContent = p.amount < p.price ? fmt(p.price) : '';
+  $('#h-new').textContent = fmt(p.amount);
+  $('#h-off').textContent = p.amount < p.price ? '−'+Math.round((1-p.amount/p.price)*100)+'%' : '';
+}
+
+/* ================= MINI TEST ================= */
+const QUIZ = [
+  ['Hozir qaysi bosqichdasiz?', [['1–2-kurs',0],['3–4-kurs',1],['Magistratura',2],['Bitirganman',2]]],
+  ['Ingliz tili darajangiz qanday?', [['Boshlang\'ich',0],['O\'rta (B1)',1],['Yaxshi (B2)',2],['IELTS 6+ bor',3]]],
+  ['Asosiy maqsadingiz nima?', [['CV\'ni sertifikatlar bilan kuchaytirish',1],['Xorijda grant bilan o\'qish',2],['Ikkalasi ham',2]]],
+  ['Hozir nechta xalqaro sertifikatingiz bor?', [['Hali yo\'q',0],['1–2 ta',1],['3 va undan ko\'p',2]]],
+  ['Kuniga qancha vaqt ajrata olasiz?', [['30 daqiqa',0],['1 soat',1],['1,5–2 soat',2]]]
+];
+const RESULTS = [
+  { min:0, icon:'🌱', title:'Boshlovchi yulduz', text:'Siz yo\'lning boshidasiz va bu juda yaxshi: hammasini to\'g\'ri tartibda qurasiz. Avval bepul xalqaro sertifikatlar va ingliz tilini mustahkamlashdan boshlang. Kursning 3–4-kunlari aynan siz uchun.' },
+  { min:4, icon:'🌸', title:'Yo\'ldagi stipendiat', text:'Poydevoringiz bor. Endi sertifikatlarni ko\'paytirib, CV va motivatsion xatni xalqaro darajaga olib chiqish vaqti. Kursdan keyin grantlarga ariza topshirishga tayyor bo\'lasiz.' },
+  { min:8, icon:'👑', title:'Grantga tayyor nomzod', text:'Siz kuchli nomzodsiz. Sizga hujjatlarni mukammal qilish, to\'g\'ri dasturlarni tanlash va intervyuga tayyorlanish kerak. Kursning 5–9-kunlari natijangizni oshiradi.' }
+];
+let qi=0, qs=0, qa=[];
+function startQuiz(){ qi=0; qs=0; qa=[]; renderQ(); }
+function renderQ(){
+  const box = $('#q-box');
+  if (qi >= QUIZ.length) return showResult();
+  $('#q-step').textContent = (qi+1)+' / '+QUIZ.length; $('#q-bar').style.width = ((qi+1)/QUIZ.length*100)+'%';
+  const [q, opts] = QUIZ[qi];
+  box.innerHTML = '<div class="qq">'+esc(q)+'</div>' + opts.map((o,i)=>'<button class="opt" data-i="'+i+'">'+esc(o[0])+'</button>').join('');
+  box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ const o=opts[+b.dataset.i]; qs+=o[1]; qa.push(q+' — '+o[0]); haptic(); qi++; renderQ(); });
+}
+function showResult(){
+  const r = RESULTS.filter(x=>qs>=x.min).pop();
+  $('#q-step').textContent = 'Natija'; $('#q-bar').style.width='100%';
+  $('#q-box').innerHTML = '<div class="result-badge">'+r.icon+'</div><h2 class="center" style="font-size:28px;margin:6px 0 10px">'+r.title+'</h2>'+
+    '<p style="font-size:14.5px;line-height:1.6;margin:0 0 16px">'+r.text+'</p>'+
+    '<button class="btn btn-main" data-go="paid">10 kunlik kursni ko\'rish</button><button class="btn btn-soft mt" data-go="home">Bosh sahifa</button>';
+  store.set('quiz', { title:r.title, answers:qa }); haptic('medium');
+  send('quiz', { result:r.title, answers:qa });
+}
+
+/* ================= PULLIK VA TO'LOV ================= */
+const fmt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ') + ' so\'m';
+function payInfo(){
+  const st = store.get('refstats'), local = store.get('paylocal') || {};
+  const base = promoOn() ? CONFIG.PROMO_PRICE : CONFIG.PRICE;
+  let p = (st && st.pay) || { price:CONFIG.PRICE, discount:0, amount:base, card:CONFIG.CARD, status:'none', reason:'', invite:'' };
+  // aksiya server javobidan keyin tugagan bo'lsa ham to'g'ri narx ko'rinsin
+  if (st && st.pay && st.pay.promoEnd && Date.now() > new Date(st.pay.promoEnd).getTime() && st.pay.base !== CONFIG.PRICE) {
+    p = Object.assign({}, p, { base: CONFIG.PRICE, amount: p.discount ? Math.round(CONFIG.PRICE*(100-p.discount)/100/10)*10 : CONFIG.PRICE });
+  }
+  if (!inTG && local.status) return Object.assign({}, p, local);   // faqat preview uchun
+  return p;
+}
+function renderPaid(){
+  const p = payInfo(), st = $('#p-state'), offer = $('#p-offer');
+  renderHeroPrice();
+  $('#p-old').textContent = p.amount < p.price ? fmt(p.price) : '';
+  $('#p-price').textContent = fmt(p.amount);
+  const pd = $('#p-disc');
+  if (p.discount){ pd.style.display='block'; pd.textContent='🎁 Sizning chegirmangiz: '+p.discount+'%'; } else pd.style.display='none';
+
+  const open = p.status === 'approved';
+  offer.style.display = open || p.status==='pending' ? 'none' : 'block';
+  if (p.status === 'pending') st.innerHTML = '<div class="state st-wait"><h3>⏳ Chekingiz tekshirilmoqda</h3><p>Admin to\'lovni tasdiqlashi bilan pullik bo\'lim ochiladi va bot sizga xabar yuboradi.</p></div>';
+  else if (p.status === 'rejected') st.innerHTML = '<div class="state st-no"><h3>😔 Chek tasdiqlanmadi</h3><p>'+(p.reason?'Sabab: <b>'+esc(p.reason)+'</b><br>':'')+'To\'lovni tekshirib, chekni qayta yuboring.</p><button class="btn btn-main mt" data-pay>Chekni qayta yuborish</button></div>';
+  else if (open) st.innerHTML = '<div class="state st-ok"><h3>🎉 Kurs ochildi!</h3><p>Xush kelibsiz! Darslar yopiq Telegram guruhda bo\'lib o\'tadi. Har bir kunni tugatganingizda belgilab boring.</p>'+
+      (p.invite?'<button class="btn btn-main mt" id="p-join">Kurs guruhiga kirish</button>':'')+'</div>';
+  else st.innerHTML = '';
+  const j = $('#p-join'); if (j) j.onclick = ()=>openLink(p.invite);
+
+  const done = store.get('done') || {};
+  $('#days').innerHTML = CONFIG.DAYS.map((d,i)=>{
+    const isDone = open && done[i];
+    return '<div class="day'+(open?' open':'')+(isDone?' done':'')+'" data-day="'+i+'"><div class="d"><small>KUN</small><b>'+(i+1)+'</b></div>'+
+      '<div class="t">'+esc(d[0])+'<span>Natija: '+esc(d[1])+'</span></div>'+(open?'<span class="chk">'+(isDone?'✓':'')+'</span>':'<span class="lock">🔒</span>')+'</div>';
+  }).join('');
+  const n = Object.values(done).filter(Boolean).length;
+  $('#p-prog').textContent = open ? n+'/10 bajarildi' : '';
+}
+$('#days').addEventListener('click', e=>{
+  const el = e.target.closest('.day.open'); if (!el) return;
+  const done = store.get('done') || {}; const i = el.dataset.day; done[i] = !done[i]; store.set('done', done);
+  haptic(done[i]?'medium':'light'); renderPaid();
+  if (Object.values(done).filter(Boolean).length === 10) toast('Tabriklaymiz! 10 kunlik yo\'l yakunlandi 🎓');
+});
+function openLink(url){ try { tg && inTG ? tg.openTelegramLink(url) : window.open(url,'_blank'); } catch(e){ window.open(url,'_blank'); } }
+
+// «Kursga yozilish» → to'lov ekrani
+let enrollSent = false;
+document.addEventListener('click', e=>{
+  if (!e.target.closest('[data-pay]')) return;
+  haptic(); renderPay(); go('pay');
+  if (!enrollSent){ enrollSent = true; send('enroll', {}); }
+});
+function renderPay(){
+  const p = payInfo();
+  $('#y-old').textContent = p.amount < p.price ? fmt(p.price) : '';
+  $('#y-amt').textContent = fmt(p.amount);
+  $('#y-disc').style.display = p.discount ? 'block' : 'none';
+  $('#y-disc').textContent = '🎁 '+p.discount+'% chegirma qo\'llandi';
+  $('#y-card').textContent = (p.card||CONFIG.CARD).number;
+  $('#y-holder').textContent = (p.card||CONFIG.CARD).holder;
+}
+$('#y-copy').addEventListener('click', async ()=>{
+  const num = $('#y-card').textContent.replace(/\s/g,'');
+  try { await navigator.clipboard.writeText(num); toast('Karta raqami nusxalandi ✅'); }
+  catch(e){ const r=document.createRange(); r.selectNodeContents($('#y-card')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast('Raqamni belgilab nusxalang'); }
+  haptic();
+});
+// chek rasmini siqib olish (1280px gacha, JPEG)
+let receiptData = '';
+$('#y-file').addEventListener('change', e=>{
+  const f = e.target.files && e.target.files[0]; $('#y-err').textContent='';
+  if (!f) return;
+  if (!/^image\//.test(f.type)) return $('#y-err').textContent='Faqat rasm yuklang (skrinshot yoki foto)';
+  const img = new Image(), url = URL.createObjectURL(f);
+  img.onload = ()=>{
+    const k = Math.min(1, 1280/Math.max(img.width,img.height));
+    const c = document.createElement('canvas'); c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    receiptData = c.toDataURL('image/jpeg', .82); URL.revokeObjectURL(url);
+    const pv=$('#y-prev'); pv.src=receiptData; pv.hidden=false; $('#y-ph').textContent='🔄 Boshqa rasm tanlash';
+    $('#y-send').disabled=false; haptic();
+  };
+  img.onerror = ()=>{ $('#y-err').textContent='Rasmni ochib bo\'lmadi, boshqasini tanlang'; };
+  img.src = url;
+});
+$('#y-send').addEventListener('click', async ()=>{
+  if (!receiptData) return;
+  const b=$('#y-send'); b.disabled=true; b.textContent='Yuborilmoqda…';
+  const r = await send('receipt', { image: receiptData });
+  b.textContent='Chekni yuborish';
+  if (!r.ok){ b.disabled=false; return $('#y-err').textContent = r.error==='already_paid' ? 'Siz allaqachon to\'lov qilgansiz ✅' : 'Yuborilmadi. Internetni tekshirib, qayta urining.'; }
+  if (r.demo) store.set('paylocal', { status:'pending' });
+  receiptData=''; $('#y-prev').hidden=true; $('#y-ph').textContent='📎 Chek skrinshotini tanlash'; $('#y-file').value='';
+  haptic('heavy'); toast('Chek yuborildi! Tasdiqlanishini kuting 💌');
+  await loadRefs(); renderPaid(); go('paid');
+});
+// faqat preview (Telegram'dan tashqari) uchun: tasdiqlangan holatni ko'rish
+function demoTools(){
+  if (inTG) return;
+  const d = document.createElement('div'); d.className='demo';
+  d.innerHTML = 'Preview rejimi: <a data-demo="approved">tasdiqlangan holat</a> · <a data-demo="rejected">rad etilgan</a> · <a data-demo="none">boshidan</a>';
+  $('#s-paid').appendChild(d);
+  d.addEventListener('click', e=>{ const a=e.target.closest('[data-demo]'); if(!a) return;
+    store.set('paylocal', { status:a.dataset.demo, reason: a.dataset.demo==='rejected'?'Summa to\'liq emas':'', invite: a.dataset.demo==='approved'?'https://t.me/':'' }); renderPaid(); });
+}
+$('#p-admin').addEventListener('click', ()=>{ const url='https://t.me/'+CONFIG.ADMIN_USERNAME;
+  try { tg && inTG ? tg.openTelegramLink(url) : window.open(url,'_blank'); } catch(e){ window.open(url,'_blank'); } });
+
+/* ================= PROFIL ================= */
+function refLink(){ const id = tgUser ? tgUser.id : 'demo'; return 'https://t.me/'+CONFIG.BOT_USERNAME+'?startapp=ref_'+id; }
+function renderMe(){
+  const u = store.get('user')||{}, q = store.get('quiz');
+  $('#m-name').textContent = u.name || '';
+  const nick = tgUser && tgUser.username ? '@'+tgUser.username : '—';
+  $('#m-info').innerHTML = [['Telefon',u.phone],['Telegram',nick],['O\'qish joyi',u.uni||'—'],['Bosqich',u.stage||'—'],['Test natijasi',q?q.title:'Hali topshirilmagan']]
+    .map(r=>'<div class="kv"><span>'+r[0]+'</span><b>'+esc(r[1]||'—')+'</b></div>').join('');
+  $('#m-ref').textContent = refLink();
+  renderRefs(store.get('refstats'));
+  loadRefs();
+}
+/* ---- taklif tizimi ---- */
+// Haqiqiy qoidalar serverdan keladi; bu faqat server javob berguncha ko'rsatiladi
+const REF_DEFAULT = { REG_GOAL:10, REG_DISCOUNT:10, PAID_GOAL:1, PAID_DISCOUNT:25 };
+function renderRefs(st){
+  st = st || { stats:{regs:0,paid:0,discount:0}, rules:REF_DEFAULT, refs:[] };
+  const R = st.rules || REF_DEFAULT, s = st.stats;
+  $('#m-rules').innerHTML = 'Havolangiz orqali <b>'+R.REG_GOAL+' ta</b> dugonangiz ro\'yxatdan o\'tsa — <b>'+R.REG_DISCOUNT+'%</b> chegirma. '+
+    (R.PAID_GOAL>1?'<b>'+R.PAID_GOAL+' ta</b> dugonangiz':'Bitta dugonangiz')+' kursga to\'lov qilsa — <b>'+R.PAID_DISCOUNT+'%</b> chegirma!';
+  $('#m-disc').textContent = s.discount + '%';
+  $('#g1-t').textContent = Math.min(s.regs,R.REG_GOAL)+'/'+R.REG_GOAL; $('#g1-b').style.width = Math.min(100, s.regs/R.REG_GOAL*100)+'%';
+  $('#g2-t').textContent = Math.min(s.paid,R.PAID_GOAL)+'/'+R.PAID_GOAL; $('#g2-b').style.width = Math.min(100, s.paid/R.PAID_GOAL*100)+'%';
+  const refs = st.refs || [];
+  $('#m-refs').innerHTML = refs.length
+    ? '<div class="goal-h" style="margin:2px 0 6px"><span>Taklif qilganlaringiz</span></div><div class="friends">'+refs.map(r=>'<span class="'+(r.paid?'p':'')+'">'+(r.paid?'💎 ':'')+esc(r.name)+'</span>').join('')+'</div>'
+    : '<p class="muted" style="font-size:12.5px;margin:0">Hali hech kim qo\'shilmadi. Havolani dugonalaringizga yuboring 👇</p>';
+}
+async function loadRefs(){
+  const r = await send('me', {});
+  if (r && r.ok && r.stats){ store.set('refstats', r); renderRefs(r); renderPaid(); }
+}
+$('#m-share').addEventListener('click', ()=>{
+  const link = refLink(), text = 'Grantora: talaba qizlar uchun grant va xalqaro sertifikatlar kursi. Bepul qo\'llanmani ol 👇';
+  const url = 'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);
+  try { tg && inTG ? tg.openTelegramLink(url) : window.open(url,'_blank'); } catch(e){ window.open(url,'_blank'); }
+});
+$('#m-edit').addEventListener('click', ()=>{
+  const u = store.get('user')||{};
+  $('#r-name').value=u.name||''; $('#r-phone').value=u.phone||''; $('#r-uni').value=u.uni||''; $('#r-ok').checked=true;
+  stage=u.stage||''; document.querySelectorAll('#r-stage .chip').forEach(c=>c.classList.toggle('on', c.textContent===stage));
+  go('reg');
+});
+
+/* ================= MUROJAAT (taklif / shikoyat / savol) ================= */
+let fbKind = 'taklif';
+$('#fb-kind').addEventListener('click', e=>{ const c=e.target.closest('.chip'); if(!c) return;
+  document.querySelectorAll('#fb-kind .chip').forEach(x=>x.classList.remove('on')); c.classList.add('on'); fbKind=c.dataset.k; haptic(); });
+$('#fb-send').addEventListener('click', async ()=>{
+  const text = $('#fb-text').value.trim(), err=$('#fb-err'); err.textContent='';
+  if (text.length < 3) return err.textContent='Xabaringizni yozing';
+  const b=$('#fb-send'); b.disabled=true; b.textContent='Yuborilmoqda…';
+  const r = await send('feedback', { kind: fbKind, text });
+  b.disabled=false; b.textContent='Yuborish';
+  if (!r.ok) return err.textContent = r.error==='limit' ? 'Bugun juda ko\'p xabar yubordingiz, ertaga urinib ko\'ring' : 'Yuborilmadi, qayta urinib ko\'ring';
+  $('#fb-text').value=''; haptic('medium'); toast('Rahmat! Xabaringiz adminga yetkazildi 💌');
+});
+$('#fb-tg').addEventListener('click', ()=>openLink('https://t.me/'+CONFIG.ADMIN_USERNAME));
+
+/* ================= ISHGA TUSHIRISH ================= */
+(async function init(){
+  if (tgUser){ $('#r-name').value = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' '); }
+  const cloud = await cloudLoad('user'); if (cloud && !store.get('user')) store.set('user', cloud);
+  const cq = await cloudLoad('quiz'); if (cq && !store.get('quiz')) store.set('quiz', cq);
+  if (!CONFIG.ADMIN_USERNAME){ ['#p-admin','#fb-tg'].forEach(s=>{ const el=$(s); if(el) el.style.display='none'; }); }
+  demoTools(); fillHome(); tick(); setInterval(tick, 1000);
+  renderRefs(store.get('refstats')); if (store.get('user')) loadRefs();
+  go(store.get('user') ? 'home' : 'reg');
+})();
+</script>
+</body>
+</html>
