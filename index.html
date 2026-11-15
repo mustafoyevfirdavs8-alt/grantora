@@ -857,7 +857,9 @@ $('#r-send').addEventListener('click', async ()=>{
 
 /* ================= BOSH SAHIFA ================= */
 function fillHome(){
-  const u = store.get('user'); $('#h-name').textContent = u ? u.name.split(' ')[0] : 'Go\'zal';
+  const u = store.get('user');
+  const tgFirst = tgUser && tgUser.first_name ? String(tgUser.first_name).trim() : '';
+  $('#h-name').textContent = tgFirst || (u && u.name ? u.name.split(' ')[0] : 'Go\'zal');
   const T = CONFIG.TEACHER;
   $('#t-name').textContent = T.name; $('#t-role').textContent = T.role; $('#t-ach').innerHTML = (T.achievements||[]).map(a=>'<li><span class="ae">'+esc(a[0])+'</span><div><b>'+esc(a[1])+'</b><small>'+esc(a[2])+'</small></div></li>').join('');
   const av = $('#t-ava');
@@ -1131,10 +1133,27 @@ function renderRefs(st){
     ? '<div class="goal-h" style="margin:2px 0 6px"><span>Taklif qilganlaringiz</span></div><div class="friends">'+refs.map(r=>'<span class="'+(r.paid?'p':'')+'">'+(r.paid?'💎 ':'')+esc(r.name)+'</span>').join('')+'</div>'
     : '<p class="muted" style="font-size:12.5px;margin:0">Hali hech kim qo\'shilmadi. Havolani dugonalaringizga yuboring 👇</p>';
 }
+const PT = (()=>{ try { return new URLSearchParams(location.search).get('pt') || ''; } catch(e){ return ''; } })();
+let refsBusy = false;
 async function loadRefs(){
-  const r = await send('me', {});
-  if (r && r.ok && r.stats){ store.set('refstats', r); renderRefs(r); renderPaid(); }
+  if (refsBusy) return; refsBusy = true;
+  try {
+    const before = (payInfo()||{}).status;
+    const r = await send('me', PT ? { pt: PT } : {});
+    if (r && r.ok && r.stats){
+      store.set('refstats', r); renderRefs(r); renderPaid();
+      if (before !== 'approved' && r.pay && r.pay.status === 'approved'){
+        try { tg && tg.HapticFeedback.notificationOccurred('success'); } catch(e){}
+        toast('🎉 To\'lov tasdiqlandi! Kurs ochildi');
+        if (current === 'pay' || current === 'home') go('paid');
+      }
+    }
+  } finally { refsBusy = false; }
 }
+// Chek tekshirilayotgan paytda holatni tez-tez yangilab turamiz — tasdiqlansa darhol ochiladi
+setInterval(()=>{ if (document.visibilityState === 'visible' && store.get('user') && (payInfo()||{}).status === 'pending') loadRefs(); }, 7000);
+document.addEventListener('visibilitychange', ()=>{ if (document.visibilityState === 'visible' && store.get('user')) loadRefs(); });
+try { tg && tg.onEvent && tg.onEvent('activated', ()=>{ if (store.get('user')) loadRefs(); }); } catch(e){}
 $('#m-share').addEventListener('click', ()=>{
   const link = refLink(), text = 'Grantora: talaba qizlar uchun grant va xalqaro sertifikatlar kursi. Bepul qo\'llanmani ol 👇';
   const url = 'https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text);
@@ -1185,7 +1204,7 @@ function openExt(url){ try { if (tg && inTG && tg.openLink) tg.openLink(url); el
   if (!CONFIG.ADMIN_USERNAME){ ['#p-admin','#fb-tg','#y-support'].forEach(s=>{ const el=$(s); if(el) el.style.display='none'; }); }
   demoTools(); fillHome(); tick(); setInterval(tick, 1000);
   renderRefs(store.get('refstats')); if (store.get('user')) loadRefs();
-  go(store.get('user') ? 'home' : 'reg');
+  go(store.get('user') ? (PT ? 'paid' : 'home') : 'reg');
 })();
 </script>
 </body>
