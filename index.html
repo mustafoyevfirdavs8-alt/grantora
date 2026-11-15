@@ -190,6 +190,12 @@ textarea.inp{min-height:110px;resize:vertical}
 .toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-80px);background:var(--plum);color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;font-weight:700;z-index:50;transition:transform .3s;max-width:90%;text-align:center}
 .toast.on{transform:translate(-50%,0)}
 .center{text-align:center}
+.doc h3{font-size:19px;margin:18px 0 6px}
+.doc p,.doc li{font-size:13.5px;line-height:1.6;margin:0 0 8px;color:var(--ink)}
+.doc ul{padding-left:18px;margin:0 0 8px}
+.doc .meta{font-size:12.5px;color:var(--muted);margin:0 0 6px}
+.lnk{color:var(--rosegold);font-weight:800;text-decoration:underline}
+.legal-note{font-size:12px;color:var(--muted);text-align:center;margin:10px 0 0;line-height:1.5}
 .mt{margin-top:12px}
 </style>
 </head>
@@ -257,7 +263,7 @@ textarea.inp{min-height:110px;resize:vertical}
       </div>
 
       <label class="consent"><input type="checkbox" id="r-ok">
-        <span>Ma'lumotlarim kurs bo'yicha bog'lanish uchun Grantora jamoasiga yuborilishiga roziman.</span></label>
+        <span><a href="#" class="lnk" data-go="oferta">Ommaviy oferta</a> shartlari bilan tanishdim va ma'lumotlarim kurs bo'yicha bog'lanish uchun Grantora jamoasiga yuborilishiga roziman.</span></label>
       <div class="err" id="r-err"></div>
       <button class="btn btn-main mt" id="r-send">Ro'yxatdan o'tish ✨</button>
     </div>
@@ -415,6 +421,7 @@ textarea.inp{min-height:110px;resize:vertical}
       </label>
       <div class="err" id="y-err"></div>
       <button class="btn btn-main" id="y-send" disabled>Chekni yuborish</button>
+      <p class="legal-note">Chekni yuborish orqali siz <a href="#" class="lnk" data-go="oferta">ommaviy oferta</a> shartlarini qabul qilasiz.</p>
     </div>
 
     <div class="card" style="padding:14px 18px">
@@ -460,6 +467,101 @@ textarea.inp{min-height:110px;resize:vertical}
       <button class="btn btn-main" id="fb-send">Yuborish</button>
       <button class="btn btn-soft mt" id="fb-tg">✉️ Adminga Telegramda yozish</button>
     </div>
+    <button class="btn btn-soft mt" data-go="oferta">📄 Ommaviy oferta</button>
+  </section>
+
+  <!-- ===== 7. OMMAVIY OFERTA ===== -->
+  <section class="screen" id="s-oferta">
+    <div class="eyebrow">Huquqiy hujjat</div>
+    <h2 class="sec-title">Ommaviy oferta</h2>
+    <div class="card doc">
+      <p><b>«Grantora» 10 kunlik online kursi bo'yicha xizmat ko'rsatish shartnomasi</b></p>
+      <p class="meta">Kuchga kirgan sana: 2026-yil 15-noyabr</p>
+
+      <h3>1. Umumiy qoidalar</h3>
+      <p>1.1. Ushbu hujjat Mamaziyoyeva Diyora (keyingi o'rinlarda — Ijrochi) tomonidan har qanday jismoniy shaxsga (keyingi o'rinlarda — Buyurtmachi) yuborilgan rasmiy ommaviy taklifdir. U O'zbekiston Respublikasi Fuqarolik kodeksining 367-moddasi va 369-moddasi 2-qismiga muvofiq tuzilgan.</p>
+      <p>1.2. Buyurtmachi kurs uchun to'lov qilib, chekni @grantora_bot mini ilovasi orqali yuborgan paytdan boshlab oferta qabul qilingan (aksept) hisoblanadi. Fuqarolik kodeksining 370-moddasi 4-qismiga ko'ra, aksept shu shartlarda shartnoma tuzishga tengdir.</p>
+      <p>1.3. Ro'yxatdan o'tish va bepul bo'limdan foydalanish to'lovsiz. Pullik kursga oid shartlar faqat aksept qilinganidan keyin qo'llanadi.</p>
+      <p>1.4. 18 yoshga to'lmagan shaxslar kursga ota-onasi yoki qonuniy vakilining roziligi bilan yoziladi.</p>
+
+      <h3>2. Atamalar</h3>
+      <ul>
+        <li><b>Kurs</b> — «Grantora: grant va xalqaro sertifikatlar sari 10 kun» online kursi.</li>
+        <li><b>Mini ilova</b> — Telegram'dagi @grantora_bot ichida ochiladigan ilova.</li>
+        <li><b>Chek</b> — to'lov o'tkazilganini tasdiqlovchi skrinshot yoki rasm.</li>
+        <li><b>Yopiq guruh</b> — darslar o'tadigan, faqat to'lov qilganlar kiradigan Telegram guruhi.</li>
+        <li><b>Taklif havolasi</b> — Buyurtmachining dugonalarini taklif qilish uchun shaxsiy havolasi.</li>
+      </ul>
+
+      <h3>3. Shartnoma predmeti</h3>
+      <p>3.1. Ijrochi Buyurtmachiga 10 kunlik online kurs bo'yicha xizmat ko'rsatadi. Kurs grant va stipendiyalarni topish, xalqaro sertifikatlar olish, CV va motivatsion xat tayyorlash, til sertifikati rejasi hamda intervyuga tayyorgarlikni o'z ichiga oladi.</p>
+      <p>3.2. Kurs 2026-yil 5-dekabrda boshlanadi. Darslar yopiq guruhda jonli efir va yozib olingan video shaklida o'tadi. Har kuni amaliy vazifa beriladi.</p>
+      <p>3.3. Kursni tugatganlarga Grantora sertifikati beriladi. U davlat namunasidagi ta'lim hujjati hisoblanmaydi.</p>
+
+      <h3>4. Narx va chegirmalar</h3>
+      <p>4.1. Kursning asl narxi — 300 000 so'm.</p>
+      <p>4.2. 2026-yil 30-noyabr soat 23:59 gacha (Toshkent vaqti) aksiya narxi amal qiladi — 99 990 so'm. Shu muddatdan keyin asl narx qo'llanadi.</p>
+      <p>4.3. Taklif chegirmalari:</p>
+      <ul>
+        <li>taklif havolasi orqali 10 nafar shaxs ro'yxatdan o'tsa — 10%;</li>
+        <li>taklif havolasi orqali kamida 1 nafar shaxs kursga to'lov qilsa — 25%.</li>
+      </ul>
+      <p>4.4. Chegirmalar qo'shilmaydi: eng kattasi qo'llanadi. Chegirma to'lov paytidagi narxdan hisoblanadi.</p>
+      <p>4.5. To'lanadigan aniq summa mini ilovadagi to'lov sahifasida ko'rsatiladi.</p>
+
+      <h3>5. To'lov tartibi</h3>
+      <p>5.1. To'lov Ijrochining kartasiga o'tkazma orqali qilinadi: 5614 6887 0186 6740, Mamaziyoyeva Diyora.</p>
+      <p>5.2. Buyurtmachi to'lovdan keyin chekni mini ilova orqali yuboradi.</p>
+      <p>5.3. Ijrochi chekni odatda 24 soat ichida tekshiradi. Tasdiqlangach, Buyurtmachiga pullik bo'lim ochiladi va yopiq guruhga bir martalik havola beriladi.</p>
+      <p>5.4. Summa to'liq tushmagan yoki chek haqiqiy bo'lmasa, Ijrochi chekni sababini ko'rsatib rad etadi. Buyurtmachi chekni qayta yuborishi mumkin.</p>
+
+      <h3>6. Tomonlarning huquq va majburiyatlari</h3>
+      <p>6.1. Ijrochi:</p>
+      <ul>
+        <li>kursni 3-bo'limda ko'rsatilgan hajmda o'tkazadi;</li>
+        <li>vazifalarni tekshiradi va savollarga yopiq guruhda javob beradi;</li>
+        <li>dars yozuvlarini kurs tugagandan keyin 30 kun davomida ochiq saqlaydi;</li>
+        <li>dars jadvalini sababli hollarda o'zgartirishi mumkin, bu haqda oldindan xabar beradi.</li>
+      </ul>
+      <p>6.2. Buyurtmachi:</p>
+      <ul>
+        <li>ro'yxatdan o'tishda to'g'ri ma'lumot beradi;</li>
+        <li>to'lovni aniq summada qiladi;</li>
+        <li>yopiq guruh havolasini va kurs materiallarini boshqalarga bermaydi;</li>
+        <li>guruhda odob qoidalariga rioya qiladi. Qoidani qo'pol buzgan Buyurtmachi guruhdan chiqarilishi mumkin.</li>
+      </ul>
+
+      <h3>7. Pulni qaytarish</h3>
+      <p>7.1. Buyurtmachi xizmatdan istalgan vaqtda voz kechishi mumkin. Buning uchun mini ilovadagi «Admin bilan bog'lanish» bo'limi orqali yozadi.</p>
+      <p>7.2. Kurs boshlanguncha murojaat qilinsa, to'langan summa to'liq qaytariladi.</p>
+      <p>7.3. Kursning 1–3-kunlarida murojaat qilinsa, o'tilmagan kunlar uchun summa mutanosib qaytariladi.</p>
+      <p>7.4. 4-kundan boshlab to'lov qaytarilmaydi, chunki kursning asosiy qismi ko'rsatilgan bo'ladi.</p>
+      <p>7.5. Pul to'lov qilingan kartaga 10 ish kuni ichida qaytariladi.</p>
+
+      <h3>8. Javobgarlik</h3>
+      <p>8.1. Ijrochi grant yutish, universitetga qabul qilinish yoki sertifikat olishni kafolatlamaydi. Natija Buyurtmachining harakati va uchinchi tashkilotlar qaroriga bog'liq.</p>
+      <p>8.2. Ijrochi xalqaro platformalar (Coursera, edX va boshqalar) hamda grant dasturlari shartlari o'zgarishi uchun javob bermaydi.</p>
+      <p>8.3. Telegram, internet yoki to'lov tizimlaridagi uzilishlar uchun tomonlar javobgar emas. Bunday holatda dars boshqa vaqtga ko'chiriladi.</p>
+
+      <h3>9. Intellektual mulk</h3>
+      <p>9.1. Kurs materiallari, videolar va shablonlar Ijrochiga tegishli. Ularni ko'chirish, sotish yoki boshqalarga tarqatish taqiqlanadi.</p>
+
+      <h3>10. Nizolarni hal qilish</h3>
+      <p>10.1. Nizolar avvalo muzokara yo'li bilan hal qilinadi. Da'vo mini ilovadagi «Admin bilan bog'lanish» bo'limi orqali yuboriladi va 10 ish kuni ichida ko'rib chiqiladi.</p>
+      <p>10.2. Kelishuvga erishilmasa, nizo O'zbekiston Respublikasi qonunchiligiga muvofiq sudda ko'riladi.</p>
+
+      <h3>11. Ofertani o'zgartirish</h3>
+      <p>11.1. Ijrochi ofertani o'zgartirishi mumkin. Yangi tahrir mini ilovada e'lon qilingan kundan kuchga kiradi va undan keyingi akseptlarga qo'llanadi.</p>
+
+      <h3>12. Ijrochi rekvizitlari</h3>
+      <ul>
+        <li>Ijrochi: Mamaziyoyeva Diyora</li>
+        <li>Karta: 5614 6887 0186 6740</li>
+        <li>Bot: @grantora_bot</li>
+        <li>Aloqa: mini ilovadagi «Admin bilan bog'lanish» bo'limi</li>
+      </ul>
+    </div>
+    <button class="btn btn-soft" id="of-back">← Orqaga</button>
   </section>
 
 </div>
@@ -543,20 +645,22 @@ function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'
 function normPhone(p){ let d=String(p||'').replace(/\D/g,''); if(d.length===9) d='998'+d; return d.length>=11 ? '+'+d : ''; }
 
 /* ================= EKRANLAR ================= */
-let current = '';
+let current = '', prevScreen = 'home';
 const order = ['home','free','paid','me'];
 function go(name){
+  if (name==='oferta' && current && current!=='oferta') prevScreen = current;
   document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on', s.id==='s-'+name));
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on', t.dataset.go===(name==='pay'?'paid':name)));
   if (name==='paid'){ renderPaid(); if (store.get('user')) loadRefs(); }
-  $('#tabs').classList.toggle('on', name!=='reg');
+  $('#tabs').classList.toggle('on', name!=='reg' && !(name==='oferta' && prevScreen==='reg'));
   current = name; window.scrollTo(0,0);
   if (name==='quiz') startQuiz();
   if (name==='me') renderMe();
   try { if (tg && tg.BackButton){ (name==='home'||name==='reg') ? tg.BackButton.hide() : tg.BackButton.show(); } } catch(e){}
 }
-document.addEventListener('click', e=>{ const b=e.target.closest('[data-go]'); if(b){ haptic(); go(b.dataset.go); } });
-try { tg && tg.BackButton.onClick(()=>go(current==='pay'?'paid':'home')); } catch(e){}
+document.addEventListener('click', e=>{ const b=e.target.closest('[data-go]'); if(b){ if(b.tagName==='A') e.preventDefault(); haptic(); go(b.dataset.go); } });
+document.getElementById('of-back').addEventListener('click', ()=>go(prevScreen||'home'));
+try { tg && tg.BackButton.onClick(()=>go(current==='oferta'?(prevScreen||'home'):current==='pay'?'paid':'home')); } catch(e){}
 
 /* ================= RO'YXATDAN O'TISH ================= */
 let stage = '';
