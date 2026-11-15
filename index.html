@@ -211,6 +211,14 @@ textarea.inp{min-height:110px;resize:vertical}
 .doc ul{padding-left:18px;margin:0 0 8px}
 .doc .meta{font-size:12.5px;color:var(--muted);margin:0 0 6px}
 .lnk{color:var(--rosegold);font-weight:800;text-decoration:underline}
+.doc-tabs{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:4px;margin:0 0 12px}
+.doc-tabs button{flex:1;border:0;background:none;border-radius:12px;padding:10px 6px;font:inherit;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer}
+.doc-tabs button.on{background:var(--plum);color:#fff}
+.doc table{width:100%;border-collapse:collapse;font-size:12.5px;margin:4px 0 10px}
+.doc th,.doc td{border:1px solid var(--line);padding:6px;text-align:left;vertical-align:top;line-height:1.4}
+.doc th{background:var(--blush);color:var(--plum)}
+.warn{display:flex;gap:10px;font-size:12.5px;line-height:1.5;color:#7a4a12;background:#FFF3E3;border:1px solid #F3DDB5;border-radius:14px;padding:11px 12px;margin:12px 0 0}
+.warn b{color:#6b3a0a}
 .legal-note{font-size:12px;color:var(--muted);text-align:center;margin:10px 0 0;line-height:1.5}
 .mt{margin-top:12px}
 </style>
@@ -279,7 +287,7 @@ textarea.inp{min-height:110px;resize:vertical}
       </div>
 
       <label class="consent"><input type="checkbox" id="r-ok">
-        <span><a href="#" class="lnk" data-go="oferta">Ommaviy oferta</a> shartlari bilan tanishdim va ma'lumotlarim kurs bo'yicha bog'lanish uchun Grantora jamoasiga yuborilishiga roziman.</span></label>
+        <span><a href="#" class="lnk" data-go="oferta" data-doc="oferta">Ommaviy oferta</a> va <a href="#" class="lnk" data-go="oferta" data-doc="privacy">maxfiylik siyosati</a> bilan tanishdim va shaxsga doir ma'lumotlarim kurs bo'yicha bog'lanish uchun qayta ishlanishiga roziman.</span></label>
       <div class="err" id="r-err"></div>
       <button class="btn btn-main mt" id="r-send">Ro'yxatdan o'tish ✨</button>
     </div>
@@ -441,7 +449,7 @@ textarea.inp{min-height:110px;resize:vertical}
       </label>
       <div class="err" id="y-err"></div>
       <button class="btn btn-main" id="y-send" disabled>Chekni yuborish</button>
-      <p class="legal-note">Chekni yuborish orqali siz <a href="#" class="lnk" data-go="oferta">ommaviy oferta</a> shartlarini qabul qilasiz.</p>
+      <p class="legal-note">Chekni yuborish orqali siz <a href="#" class="lnk" data-go="oferta" data-doc="oferta">ommaviy oferta</a> shartlarini qabul qilasiz.</p>
     </div>
 
     <div class="card" style="padding:14px 18px">
@@ -461,6 +469,7 @@ textarea.inp{min-height:110px;resize:vertical}
         <span class="disc" id="m-disc">0%</span>
       </div>
       <p class="sub" style="margin:6px 0 12px" id="m-rules"></p>
+      <div class="warn" style="margin:0 0 12px"><span>⚠️</span><span><b>Diqqat:</b> faqat do'stlaringiz havolangiz orqali ro'yxatdan o'tgani hisobga olinadi. O'zingizning boshqa akkauntlaringizdan qilingan takliflar inobatga olinmaydi. Har bir taklif admin tomonidan tekshiriladi, qoida buzilsa chegirma bekor qilinadi.</span></div>
       <div class="goal">
         <div class="goal-h"><span>👭 Ro'yxatdan o'tganlar</span><b id="g1-t">0/10</b></div>
         <div class="qprog"><i id="g1-b" style="width:0"></i></div>
@@ -487,14 +496,15 @@ textarea.inp{min-height:110px;resize:vertical}
       <button class="btn btn-main" id="fb-send">Yuborish</button>
       <button class="btn btn-soft mt" id="fb-tg">✉️ Adminga Telegramda yozish</button>
     </div>
-    <button class="btn btn-soft mt" data-go="oferta">📄 Ommaviy oferta</button>
+    <button class="btn btn-soft mt" data-go="oferta" data-doc="oferta">📄 Ommaviy oferta va maxfiylik siyosati</button>
   </section>
 
   <!-- ===== 7. OMMAVIY OFERTA ===== -->
   <section class="screen" id="s-oferta">
-    <div class="eyebrow">Huquqiy hujjat</div>
-    <h2 class="sec-title">Ommaviy oferta</h2>
-    <div class="card doc">
+    <div class="eyebrow">Huquqiy hujjatlar</div>
+    <h2 class="sec-title" id="doc-title">Ommaviy oferta</h2>
+    <div class="doc-tabs"><button type="button" data-doc="oferta" class="on">📄 Ommaviy oferta</button><button type="button" data-doc="privacy">🔒 Maxfiylik siyosati</button></div>
+    <div class="card doc" id="doc-oferta">
       <p><b>«Grantora» 10 kunlik online kursi bo'yicha xizmat ko'rsatish shartnomasi</b></p>
       <p class="meta">Kuchga kirgan sana: 2026-yil 15-noyabr</p>
 
@@ -527,7 +537,8 @@ textarea.inp{min-height:110px;resize:vertical}
         <li>taklif havolasi orqali kamida 1 nafar shaxs kursga to'lov qilsa — 25%.</li>
       </ul>
       <p>4.4. Chegirmalar qo'shilmaydi: eng kattasi qo'llanadi. Chegirma to'lov paytidagi narxdan hisoblanadi.</p>
-      <p>4.5. To'lanadigan aniq summa mini ilovadagi to'lov sahifasida ko'rsatiladi.</p>
+      <p>4.5. Faqat boshqa shaxslar — Buyurtmachining do'stlari va tanishlari — taklif havolasi orqali ro'yxatdan o'tgani hisobga olinadi. Buyurtmachining o'z boshqa akkauntlari, soxta yoki takroriy akkauntlar orqali qilingan takliflar inobatga olinmaydi. Ijrochi shubhali takliflarni tekshirish va bunday hollarda chegirmani bekor qilish huquqiga ega.</p>
+      <p>4.6. To'lanadigan aniq summa mini ilovadagi to'lov sahifasida ko'rsatiladi.</p>
 
       <h3>5. To'lov tartibi</h3>
       <p>5.1. To'lov Ijrochining kartasiga o'tkazma orqali qilinadi: 5614 6887 0186 6740, Mamaziyoyeva Diyora.</p>
@@ -580,6 +591,75 @@ textarea.inp{min-height:110px;resize:vertical}
         <li>Bot: @grantora_bot</li>
         <li>Aloqa: mini ilovadagi «Admin bilan bog'lanish» bo'limi</li>
       </ul>
+    </div>
+
+    <div class="card doc" id="doc-privacy" style="display:none">
+      <p><b>@grantora_bot mini ilovasida shaxsga doir ma'lumotlarni qayta ishlash siyosati</b></p>
+      <p class="meta">Kuchga kirgan sana: 2026-yil 15-noyabr</p>
+
+      <h3>1. Kim qayta ishlaydi</h3>
+      <p>1.1. Ma'lumotlar mulkdori va operatori — Mamaziyoyeva Diyora (keyingi o'rinlarda — Ijrochi).</p>
+      <p>1.2. Siyosat «Shaxsga doir ma'lumotlar to'g'risida»gi O'zbekiston Respublikasi Qonuniga muvofiq tuzilgan.</p>
+
+      <h3>2. Qanday ma'lumotlar yig'iladi</h3>
+      <table>
+        <tr><th>Ma'lumot</th><th>Qachon olinadi</th><th>Nima uchun kerak</th></tr>
+        <tr><td>Ism va familiya</td><td>Ro'yxatdan o'tishda</td><td>Murojaat qilish, to'lovni bog'lash</td></tr>
+        <tr><td>Telefon raqam</td><td>Ro'yxatdan o'tishda</td><td>Siz bilan bog'lanish</td></tr>
+        <tr><td>Telegram ID va username</td><td>Mini ilova ochilganda, Telegram uzatadi</td><td>Akkauntni aniqlash, bot xabarlari</td></tr>
+        <tr><td>O'qish joyi va bosqich</td><td>Ro'yxatdan o'tishda, ixtiyoriy</td><td>Kursni moslashtirish</td></tr>
+        <tr><td>Test javoblari</td><td>Mini testda</td><td>Shaxsiy tavsiya berish</td></tr>
+        <tr><td>To'lov cheki (rasm)</td><td>To'lovda</td><td>To'lovni tasdiqlash</td></tr>
+        <tr><td>Murojaat matni</td><td>Taklif yoki shikoyat yuborilganda</td><td>Javob berish</td></tr>
+        <tr><td>Kim taklif qilgani</td><td>Taklif havolasi orqali kirilganda</td><td>Chegirmani hisoblash</td></tr>
+      </table>
+      <p>2.1. Pasport, biometrik va genetik ma'lumotlar yig'ilmaydi. Karta raqamini mini ilovaga kiritish talab qilinmaydi.</p>
+
+      <h3>3. Qayta ishlash asosi va maqsadlari</h3>
+      <p>3.1. Asos — ro'yxatdan o'tishda rozilik belgisini qo'yish orqali bergan roziligingiz.</p>
+      <p>3.2. Maqsadlar:</p>
+      <ul>
+        <li>kurs haqida ma'lumot berish va siz bilan bog'lanish;</li>
+        <li>to'lovni tekshirish va pullik bo'limni ochish;</li>
+        <li>taklif chegirmalarini hisoblash va soxta takliflarni aniqlash;</li>
+        <li>murojaatlaringizga javob berish;</li>
+        <li>kurs va keyingi oqimlar haqida bot orqali xabar yuborish.</li>
+      </ul>
+      <p>3.3. Ma'lumotlar boshqa maqsadlarda ishlatilmaydi va sotilmaydi.</p>
+
+      <h3>4. Qayerda saqlanadi va kimga beriladi</h3>
+      <p>4.1. Ma'lumotlar quyidagi xizmatlarda saqlanadi:</p>
+      <ul>
+        <li>Cloudflare (AQSh, Yevropa) — mini ilova serveri va asosiy baza;</li>
+        <li>Google Sheets va Google Drive (AQSh) — Ijrochining yopiq jadvali va cheklar papkasi;</li>
+        <li>Telegram — Ijrochi jamoasining yopiq admin guruhi.</li>
+      </ul>
+      <p>4.2. Cloudflare va Google EU–US Data Privacy Framework ishtirokchisi. O'zbekiston Vazirlar Mahkamasi tasdiqlagan ro'yxatga ko'ra, bunday AQSh kompaniyalari himoya darajasi yetarli deb tan olingan.</p>
+      <p>4.3. Ma'lumotlarga faqat Ijrochi va kurs adminlari kira oladi. Uchinchi shaxslarga faqat qonunda nazarda tutilgan hollarda beriladi.</p>
+
+      <h3>5. Saqlash muddati</h3>
+      <p>5.1. Ma'lumotlar siz o'chirishni so'raguningizcha yoki oxirgi faolligingizdan 2 yil o'tguncha saqlanadi.</p>
+      <p>5.2. To'lov cheklari soliq va hisob-kitob talablari uchun 3 yil saqlanadi.</p>
+
+      <h3>6. Sizning huquqlaringiz</h3>
+      <p>Siz quyidagilarga haqlisiz:</p>
+      <ul>
+        <li>qaysi ma'lumotlaringiz saqlanayotganini bilish;</li>
+        <li>noto'g'ri ma'lumotni tuzatish (Profil → «Ma'lumotlarni o'zgartirish»);</li>
+        <li>ma'lumotlaringizni o'chirishni talab qilish;</li>
+        <li>roziligingizni qaytarib olish.</li>
+      </ul>
+      <p>Murojaat mini ilovadagi «Admin bilan bog'lanish» bo'limi orqali yuboriladi va 10 ish kuni ichida bajariladi.</p>
+
+      <h3>7. Himoya choralari</h3>
+      <p>7.1. Mini ilova har bir so'rovda Telegram imzosini tekshiradi, shuning uchun boshqa odam sizning nomingizdan ma'lumot yubora olmaydi.</p>
+      <p>7.2. Jadval, papka va admin guruhi yopiq, ularga faqat Ijrochi ruxsat bergan shaxslar kiradi.</p>
+
+      <h3>8. Voyaga yetmaganlar</h3>
+      <p>8.1. 18 yoshga to'lmagan foydalanuvchilar ma'lumotlarini ota-onasi yoki qonuniy vakili roziligi bilan beradi.</p>
+
+      <h3>9. O'zgartirishlar</h3>
+      <p>9.1. Siyosatning yangi tahriri mini ilovada e'lon qilingan kundan kuchga kiradi.</p>
     </div>
     <button class="btn btn-soft" id="of-back">← Orqaga</button>
   </section>
@@ -686,6 +766,14 @@ function go(name){
 }
 document.addEventListener('click', e=>{ const b=e.target.closest('[data-go]'); if(b){ if(b.tagName==='A') e.preventDefault(); haptic(); go(b.dataset.go); } });
 document.getElementById('of-back').addEventListener('click', ()=>go(prevScreen||'home'));
+function showDoc(k){
+  k = k==='privacy' ? 'privacy' : 'oferta';
+  $('#doc-oferta').style.display = k==='oferta' ? 'block' : 'none';
+  $('#doc-privacy').style.display = k==='privacy' ? 'block' : 'none';
+  $('#doc-title').textContent = k==='oferta' ? 'Ommaviy oferta' : 'Maxfiylik siyosati';
+  document.querySelectorAll('.doc-tabs button').forEach(b=>b.classList.toggle('on', b.dataset.doc===k));
+}
+document.addEventListener('click', e=>{ const b=e.target.closest('[data-doc]'); if(b){ showDoc(b.dataset.doc); if(!b.dataset.go) window.scrollTo(0,0); } });
 try { tg && tg.BackButton.onClick(()=>go(current==='oferta'?(prevScreen||'home'):current==='pay'?'paid':'home')); } catch(e){}
 
 /* ================= RO'YXATDAN O'TISH ================= */
