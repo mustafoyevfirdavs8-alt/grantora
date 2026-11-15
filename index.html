@@ -219,6 +219,12 @@ textarea.inp{min-height:110px;resize:vertical}
 .doc th{background:var(--blush);color:var(--plum)}
 .warn{display:flex;gap:10px;font-size:12.5px;line-height:1.5;color:#7a4a12;background:#FFF3E3;border:1px solid #F3DDB5;border-radius:14px;padding:11px 12px;margin:12px 0 0}
 .warn b{color:#6b3a0a}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.upload{position:relative}
+.support{display:flex;gap:12px;align-items:center}
+.support .si{flex:none;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#2AABEE,#229ED9);display:grid;place-items:center;font-size:22px;color:#fff}
+.support b{display:block;color:var(--plum);font-size:15px}
+.support span{font-size:12.5px;color:var(--muted);line-height:1.4}
 .legal-note{font-size:12px;color:var(--muted);text-align:center;margin:10px 0 0;line-height:1.5}
 .mt{margin-top:12px}
 </style>
@@ -443,7 +449,7 @@ textarea.inp{min-height:110px;resize:vertical}
     <div class="card">
       <div class="step"><span class="sn">2</span><b>Chek rasmini yuklang</b></div>
       <label class="upload" id="y-drop">
-        <input type="file" id="y-file" accept="image/*" hidden>
+        <input type="file" id="y-file" accept="image/*" class="vh">
         <img id="y-prev" alt="" hidden>
         <span id="y-ph">📎 Chek skrinshotini tanlash</span>
       </label>
@@ -455,6 +461,12 @@ textarea.inp{min-height:110px;resize:vertical}
     <div class="card" style="padding:14px 18px">
       <div class="step" style="margin:0"><span class="sn">3</span><b>Tasdiqlashni kuting</b></div>
       <p class="muted" style="font-size:12.5px;margin:8px 0 0;line-height:1.5">Admin chekni tekshiradi. Tasdiqlangach, bot sizga xabar yuboradi va pullik bo'lim ochiladi.</p>
+    </div>
+
+    <div class="card" id="y-support">
+      <div class="support"><span class="si">✈️</span><div><b>To'lovda muammo bormi?</b><span>Chek yuborilmasa, summa yoki karta bo'yicha savol bo'lsa — adminga Telegramda yozing, tez hal qilamiz.</span></div></div>
+      <button class="btn btn-main mt" id="y-tg">✉️ Adminga Telegramda yozish</button>
+      <div class="muted center" style="font-size:12px;margin-top:8px" id="y-tg-nick"></div>
     </div>
   </section>
 
@@ -678,7 +690,7 @@ textarea.inp{min-height:110px;resize:vertical}
 const CONFIG = {
   API_URL: 'https://grantora-bot.mustafoyevfirdavs8.workers.dev', // bot serveri (Cloudflare Worker)
   BOT_USERNAME: 'grantora_bot',    // bot: @grantora_bot
-  ADMIN_USERNAME: '',              // admin Telegram nik (@ belgisisiz); bo'sh bo'lsa tugma ko'rinmaydi
+  ADMIN_USERNAME: 'Mustafoyev_Firdavs', // admin Telegram nik (@ belgisisiz); to'lov va boshqa muammolar uchun
   // Narx va karta aslida serverdan (worker.js) keladi; bu yerdagilar server javob berguncha ko'rinadi
   PRICE: 300000,                                   // asl narx
   PROMO_PRICE: 99990,                              // aksiya narxi
@@ -955,35 +967,99 @@ $('#y-copy').addEventListener('click', async ()=>{
   catch(e){ const r=document.createRange(); r.selectNodeContents($('#y-card')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast('Raqamni belgilab nusxalang'); }
   haptic();
 });
-// chek rasmini siqib olish (1280px gacha, JPEG)
+// chek rasmini siqib olish (1600px gacha, JPEG). Katta rasmlar ham qotirmasligi uchun bosqichma-bosqich.
 let receiptData = '';
-$('#y-file').addEventListener('change', e=>{
-  const f = e.target.files && e.target.files[0]; $('#y-err').textContent='';
+const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+function fileToDataURL(f){ return new Promise((res, rej)=>{ const r = new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(r.error); r.readAsDataURL(f); }); }
+function loadImg(f){ return new Promise((res, rej)=>{ const url = URL.createObjectURL(f), img = new Image();
+  img.onload = ()=>{ res({ src: img, w: img.naturalWidth, h: img.naturalHeight, done: ()=>URL.revokeObjectURL(url) }); };
+  img.onerror = ()=>{ URL.revokeObjectURL(url); rej(new Error('decode')); }; img.src = url; }); }
+async function decode(f){
+  if (window.createImageBitmap){ try { const b = await createImageBitmap(f); return { src: b, w: b.width, h: b.height, done: ()=>{ try{ b.close(); }catch(e){} } }; } catch(e){} }
+  return loadImg(f);
+}
+async function compressReceipt(f){
+  const im = await decode(f);
+  try {
+    const MAX = 1600; let w = im.w, h = im.h;
+    if (!w || !h) throw new Error('decode');
+    const k = Math.min(1, MAX / Math.max(w, h)); w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+    // juda uzun skrinshotlar: Telegram 1:20 dan uzun rasmni qabul qilmaydi — server fayl sifatida yuboradi
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h); ctx.drawImage(im.src, 0, 0, w, h);
+    let out = c.toDataURL('image/jpeg', .82);
+    if (out.length > 4.5e6) out = c.toDataURL('image/jpeg', .6);
+    c.width = c.height = 0;
+    return out;
+  } finally { im.done(); }
+}
+function resetUpload(){ receiptData=''; $('#y-prev').hidden=true; $('#y-prev').removeAttribute('src'); $('#y-ph').textContent='📎 Chek skrinshotini tanlash'; $('#y-send').disabled=true; }
+$('#y-file').addEventListener('change', async e=>{
+  const input = e.target, f = input.files && input.files[0]; $('#y-err').textContent='';
   if (!f) return;
-  if (!/^image\//.test(f.type)) return $('#y-err').textContent='Faqat rasm yuklang (skrinshot yoki foto)';
-  const img = new Image(), url = URL.createObjectURL(f);
-  img.onload = ()=>{
-    const k = Math.min(1, 1280/Math.max(img.width,img.height));
-    const c = document.createElement('canvas'); c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
-    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-    receiptData = c.toDataURL('image/jpeg', .82); URL.revokeObjectURL(url);
-    const pv=$('#y-prev'); pv.src=receiptData; pv.hidden=false; $('#y-ph').textContent='🔄 Boshqa rasm tanlash';
-    $('#y-send').disabled=false; haptic();
-  };
-  img.onerror = ()=>{ $('#y-err').textContent='Rasmni ochib bo\'lmadi, boshqasini tanlang'; };
-  img.src = url;
+  input.value = ''; // bir xil rasmni qayta tanlash ham ishlashi uchun
+  const looksImage = /^image\//.test(f.type) || (!f.type && /\.(jpe?g|png|webp|heic|heif|gif)$/i.test(f.name||''));
+  if (!looksImage) return $('#y-err').textContent='Faqat rasm yuklang (skrinshot yoki foto)';
+  if (f.size > 25 * 1024 * 1024) return $('#y-err').textContent='Rasm juda katta. Chek skrinshotini yuboring';
+  resetUpload(); $('#y-ph').textContent='⏳ Rasm tayyorlanmoqda…';
+  try {
+    receiptData = await withTimeout(compressReceipt(f), 20000);
+  } catch(err){
+    // siqib bo'lmasa — kichik fayl bo'lsa o'zini yuboramiz
+    if (f.size <= 4.5 * 1024 * 1024){ try { receiptData = await fileToDataURL(f); } catch(e2){ receiptData=''; } }
+    if (receiptData && !/^data:image\//.test(receiptData)) receiptData = receiptData.replace(/^data:[^;]*;/, 'data:image/' + ((f.name||'').split('.').pop().toLowerCase().replace('jpg','jpeg') || 'jpeg') + ';');
+  }
+  if (!receiptData){ resetUpload(); return $('#y-err').textContent='Rasmni ochib bo\'lmadi. Chekning skrinshotini olib, o\'shani yuklang'; }
+  const pv=$('#y-prev'); if (/^data:image\/(jpeg|png|webp|gif)/.test(receiptData)){ pv.src=receiptData; pv.hidden=false; }
+  $('#y-ph').textContent='✅ Rasm tanlandi · boshqasini tanlash';
+  $('#y-send').disabled=false; haptic();
 });
+async function postReceipt(){
+  const base = CONFIG.API_URL;
+  if (!base || !inTG) return send('receipt', { image: receiptData });
+  const ctrl = window.AbortController ? new AbortController() : null;
+  const t = setTimeout(()=>{ try{ ctrl && ctrl.abort(); }catch(e){} }, 60000);
+  try {
+    const r = await fetch(base.replace(/\/$/,'') + '/api/lead', { method:'POST', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ initData: tg.initData, type:'receipt', data:{ image: receiptData } }), signal: ctrl ? ctrl.signal : undefined });
+    return await r.json();
+  } catch(e){ return { ok:false, error: e && e.name==='AbortError' ? 'timeout' : 'network' }; }
+  finally { clearTimeout(t); }
+}
+const RECEIPT_ERR = {
+  already_paid: 'Siz allaqachon to\'lov qilgansiz ✅',
+  timeout: 'Internet sekin, chek yetib bormadi. Qayta urinib ko\'ring.',
+  network: 'Internet bilan muammo. Qayta urinib ko\'ring.',
+  image: 'Rasm formati mos emas. Chekning skrinshotini yuklang.',
+  too_big: 'Rasm juda katta. Chekning skrinshotini yuklang.',
+  auth: 'Ilovani yopib, botdagi «Ochish» tugmasi orqali qayta oching.'
+};
+let sendingReceipt = false;
 $('#y-send').addEventListener('click', async ()=>{
-  if (!receiptData) return;
-  const b=$('#y-send'); b.disabled=true; b.textContent='Yuborilmoqda…';
-  const r = await send('receipt', { image: receiptData });
-  b.textContent='Chekni yuborish';
-  if (!r.ok){ b.disabled=false; return $('#y-err').textContent = r.error==='already_paid' ? 'Siz allaqachon to\'lov qilgansiz ✅' : 'Yuborilmadi. Internetni tekshirib, qayta urining.'; }
+  if (!receiptData || sendingReceipt) return;
+  sendingReceipt = true;
+  const b=$('#y-send'); b.disabled=true; b.textContent='Yuborilmoqda… ⏳'; $('#y-err').textContent='';
+  let r = await postReceipt();
+  // serverda ro'yxat topilmasa — avtomatik qayta ro'yxatdan o'tkazib, chekni yana yuboramiz
+  if (!r.ok && r.error==='not_registered' && store.get('user')){
+    const u = store.get('user'); const rr = await send('register', u);
+    if (rr.ok) r = await postReceipt();
+  }
+  if (!r.ok && (r.error==='network' || r.error==='timeout')) r = await postReceipt(); // bir marta qayta urinish
+  sendingReceipt = false; b.textContent='Chekni yuborish';
+  if (!r.ok){
+    b.disabled=false;
+    $('#y-err').innerHTML = esc(RECEIPT_ERR[r.error] || 'Chek yuborilmadi. Qayta urinib ko\'ring yoki pastdagi tugma orqali adminga yozing.') + (CONFIG.ADMIN_USERNAME ? ' <a href="#" class="lnk" id="y-err-tg">Adminga yozish</a>' : '');
+    const a=$('#y-err-tg'); if (a) a.onclick = ev=>{ ev.preventDefault(); openLink('https://t.me/'+CONFIG.ADMIN_USERNAME); };
+    try { tg && tg.HapticFeedback.notificationOccurred('error'); } catch(e){}
+    return;
+  }
   if (r.demo) store.set('paylocal', { status:'pending' });
-  receiptData=''; $('#y-prev').hidden=true; $('#y-ph').textContent='📎 Chek skrinshotini tanlash'; $('#y-file').value='';
+  resetUpload();
   haptic('heavy'); toast('Chek yuborildi! Tasdiqlanishini kuting 💌');
   await loadRefs(); renderPaid(); go('paid');
 });
+$('#y-tg').addEventListener('click', ()=>{ haptic(); openLink('https://t.me/'+CONFIG.ADMIN_USERNAME); });
 // faqat preview (Telegram'dan tashqari) uchun: tasdiqlangan holatni ko'rish
 function demoTools(){
   if (inTG) return;
@@ -1060,7 +1136,8 @@ $('#fb-tg').addEventListener('click', ()=>openLink('https://t.me/'+CONFIG.ADMIN_
   if (tgUser){ $('#r-name').value = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' '); }
   const cloud = await cloudLoad('user'); if (cloud && !store.get('user')) store.set('user', cloud);
   const cq = await cloudLoad('quiz'); if (cq && !store.get('quiz')) store.set('quiz', cq);
-  if (!CONFIG.ADMIN_USERNAME){ ['#p-admin','#fb-tg'].forEach(s=>{ const el=$(s); if(el) el.style.display='none'; }); }
+  if (CONFIG.ADMIN_USERNAME) $('#y-tg-nick').textContent = '@' + CONFIG.ADMIN_USERNAME;
+  if (!CONFIG.ADMIN_USERNAME){ ['#p-admin','#fb-tg','#y-support'].forEach(s=>{ const el=$(s); if(el) el.style.display='none'; }); }
   demoTools(); fillHome(); tick(); setInterval(tick, 1000);
   renderRefs(store.get('refstats')); if (store.get('user')) loadRefs();
   go(store.get('user') ? 'home' : 'reg');
