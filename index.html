@@ -251,10 +251,10 @@ textarea.inp{min-height:110px;resize:vertical}
 .dhero p{margin:0;font-size:13.5px;line-height:1.55;color:var(--plum2);animation:fade .5s .2s both}
 .dhero .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;animation:fade .5s .3s both}
 .dhero .tags span{background:#fff;border-radius:999px;padding:5px 10px;font-size:11.5px;font-weight:800;color:var(--plum2)}
-.ring{display:flex;align-items:center;gap:12px;margin:0 0 12px}
-.ring .bar{flex:1;height:10px;border-radius:10px;background:#fff;border:1px solid var(--line);overflow:hidden}
-.ring .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--rosegold));border-radius:10px;transition:width .5s cubic-bezier(.3,1,.4,1)}
-.ring b{font-size:13px;color:var(--plum);min-width:44px;text-align:right}
+.dprog{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.dprog .bar{flex:1;height:10px;border-radius:10px;background:#fff;border:1px solid var(--line);overflow:hidden}
+.dprog .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--rosegold));border-radius:10px;transition:width .5s cubic-bezier(.3,1,.4,1)}
+.dprog b{font-size:13px;color:var(--plum);min-width:44px;text-align:right}
 .steps{position:relative;margin:0 0 6px;padding:0}
 .steps:before{content:"";position:absolute;left:21px;top:20px;bottom:20px;width:2px;background:repeating-linear-gradient(var(--line) 0 6px,transparent 6px 11px)}
 .stp{position:relative;display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px 12px 12px 10px;margin-bottom:9px;cursor:pointer;opacity:0;transform:translateY(14px);animation:stepin .45s cubic-bezier(.2,.9,.3,1) forwards;transition:background .25s,border-color .25s}
@@ -1173,7 +1173,7 @@ function renderDay(animate){
       '<div class="tags"><span>⏱ ~1 soat</span><span>👣 '+tot+' qadam</span>'+(d[3]?'<span>🏅 +'+d[3]+' sertifikat</span>':'')+'</div></div>'+
     (g.why ? '<div class="why"><span>💡</span><span>'+esc(g.why)+'</span></div>' : '')+
     (open
-      ? '<div class="ring"><div class="bar"><i id="d-bar"></i></div><b id="d-pct">'+cnt+'/'+tot+'</b></div>'+stepsHtml+
+      ? '<div class="dprog"><div class="bar"><i id="d-bar"></i></div><b id="d-pct">'+cnt+'/'+tot+'</b></div>'+stepsHtml+
         (links.length ? '<div class="dlinks">'+links.map(l=>'<button class="btn btn-soft" data-ext="'+esc(l[1])+'">🔗 '+esc(l[0])+'</button>').join('')+'</div>' : '')+
         '<div class="dres"><span class="ri">🎯</span><div><b>Kun natijasi</b><span>'+esc(d[2])+'</span></div></div>'+
         (done ? '<div class="state st-ok" style="margin-top:6px"><h3>✅ Bu kun yakunlangan</h3><p>Barakalla! Keyingi kunga o\'ting.</p></div>' :
