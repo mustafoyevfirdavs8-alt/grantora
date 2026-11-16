@@ -945,16 +945,28 @@ function cloudLoad(k){ return new Promise(res=>{
   catch(e){ res(null); } }); }
 
 /* ================= SERVER ================= */
-async function rawSend(type, data){
+// Zaxira yo'l (Google Apps Script orqali) — bot serveri internet provayder tomonidan ochilmay qolsa ishlaydi
+const RELAY_URL = 'https://script.google.com/macros/s/AKfycby1Vqi9oJwuZGCQHAMqJMpR9OKOlp7ST6bDn1aRfdaKw9xgKPIJSbiBUP05gfkgdDRN/exec';
+let viaRelay = false;
+async function postJSON(url, body, ms){
+  const ctrl = window.AbortController ? new AbortController() : null;
+  const t = setTimeout(()=>{ try{ ctrl && ctrl.abort(); }catch(e){} }, ms);
+  try {
+    const r = await fetch(url, { method:'POST', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(body), signal: ctrl ? ctrl.signal : undefined, redirect:'follow' });
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+async function rawSend(type, data, ms){
   const base = CONFIG.API_URL || (/^https?:/.test(location.protocol) && !/claude/.test(location.hostname) ? location.origin : '');
   if (!base || !inTG) return { ok:true, demo:true };
-  try {
-    const r = await fetch(base.replace(/\/$/,'') + '/api/lead', {
-      method:'POST', headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({ initData: tg.initData, type, data })
-    });
-    return await r.json();
-  } catch(e){ return { ok:false, error:'network' }; }
+  const body = { initData: tg.initData, type, data };
+  const wait = ms || 9000;
+  if (!viaRelay){
+    try { return await postJSON(base.replace(/\/$/,'') + '/api/lead', body, wait); }
+    catch(e){ viaRelay = true; }
+  }
+  try { return await postJSON(RELAY_URL, { relay: body }, wait + 20000); }
+  catch(e){ viaRelay = false; return { ok:false, error: e && e.name==='AbortError' ? 'timeout' : 'network' }; }
 }
 // Telefon xotirasida ro'yxat bor, serverda yo'q bo'lsa — jimgina qayta ro'yxatdan o'tkazib, so'rovni takrorlaymiz
 async function send(type, data){
@@ -1381,16 +1393,8 @@ $('#y-file').addEventListener('change', async e=>{
   $('#y-send').disabled=false; haptic();
 });
 async function postReceipt(){
-  const base = CONFIG.API_URL;
-  if (!base || !inTG) return send('receipt', { image: receiptData });
-  const ctrl = window.AbortController ? new AbortController() : null;
-  const t = setTimeout(()=>{ try{ ctrl && ctrl.abort(); }catch(e){} }, 60000);
-  try {
-    const r = await fetch(base.replace(/\/$/,'') + '/api/lead', { method:'POST', headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({ initData: tg.initData, type:'receipt', data:{ image: receiptData } }), signal: ctrl ? ctrl.signal : undefined });
-    return await r.json();
-  } catch(e){ return { ok:false, error: e && e.name==='AbortError' ? 'timeout' : 'network' }; }
-  finally { clearTimeout(t); }
+  if (!CONFIG.API_URL || !inTG) return send('receipt', { image: receiptData });
+  return rawSend('receipt', { image: receiptData }, 30000);
 }
 const RECEIPT_ERR = {
   already_paid: 'Siz allaqachon to\'lov qilgansiz ✅',
