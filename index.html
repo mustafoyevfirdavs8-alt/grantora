@@ -306,6 +306,21 @@ textarea.inp{min-height:110px;resize:vertical}
 @keyframes sheetup{from{transform:translateY(100%)}to{transform:none}}
 @keyframes fadein{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.stp,.tour .flow div{animation-duration:.01s}.dhero .ico,.tour .big,.dres .ri{animation:none}}
+.score-card{display:flex;gap:14px;align-items:center;border-radius:20px;padding:14px 16px;margin:0 0 12px;background:linear-gradient(135deg,#FFF6E6,#F9E7C4);border:1px solid #EFD7A8}
+.score-card .sbig{font-family:"Cormorant Garamond",serif;font-size:38px;font-weight:700;color:#6b4a12;line-height:1}
+.score-card .sbig small{font-size:15px;color:#a07b33}
+.score-card b{display:block;color:#6b4a12;font-size:14px}
+.score-card span{font-size:12px;color:#8a6a2c;line-height:1.4}
+.grade{display:flex;align-items:center;gap:10px;border-radius:16px;padding:12px 14px;margin:8px 0;background:#FFF8EC;border:1px solid #F1DFB8;font-size:13.5px;color:#6b4a12;animation:fade .5s both}
+.grade .st{font-size:18px;letter-spacing:2px}
+.day .sc{flex:none;font-size:11px;font-weight:800;color:#7a5a1c;background:#F8EBD0;border-radius:999px;padding:4px 7px}
+.hw{border-radius:20px;padding:16px;margin:10px 0;background:#fff;border:2px dashed var(--rose);animation:fade .5s both}
+.hw h3{font-size:18px;margin:0 0 4px;color:var(--plum)}
+.hw p{font-size:12.5px;color:var(--muted);margin:0 0 10px;line-height:1.45}
+.hw .pick{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;border-radius:16px;padding:16px;background:#FFF8F9;color:var(--plum2);font-weight:800;cursor:pointer;text-align:center}
+.hw .pick img{max-width:100%;max-height:220px;border-radius:12px;box-shadow:var(--shadow)}
+.hw textarea{width:100%;margin-top:10px;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font:inherit;font-size:13.5px;resize:vertical;min-height:56px;background:#fff;color:var(--ink)}
+.hw .err{color:#c0392b;font-size:12.5px;margin-top:6px;min-height:1em}
 .legal-note{font-size:12px;color:var(--muted);text-align:center;margin:10px 0 0;line-height:1.5}
 .mt{margin-top:12px}
 </style>
@@ -497,6 +512,7 @@ textarea.inp{min-height:110px;resize:vertical}
       <button class="btn btn-gold" data-pay>Kursga yozilish 🔥</button>
     </div>
 
+    <div id="p-score"></div>
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 10px">
       <h3 style="font-size:22px">10 kunlik dastur</h3><span class="muted" style="font-size:12.5px;font-weight:700" id="p-prog"></span>
     </div>
@@ -1132,6 +1148,9 @@ function renderPaid(){
       '<div class="t">'+esc(d[0])+'<span>'+esc(d[1])+'</span><em>✓ Natija: '+esc(d[2])+'</em>'+bar+'</div>'+(d[3]?'<span class="cert">+'+d[3]+' sertifikat</span>':'')+(open?(isDone?'<span class="chk">✓</span>':'<span class="go">›</span>'):'<span class="lock">🔒</span>')+'</div>';
   }).join('');
   $('#p-certs').textContent = CONFIG.DAYS.reduce((a,d)=>a+(d[3]||0),0);
+  const scs = scoresInfo();
+  $('#p-score').innerHTML = open ? '<div class="score-card"><div class="sbig">'+scs.total+'<small>/'+scs.max+'</small></div><div><b>⭐ Sizning ballaringiz</b><span>Har bir kun vazifasini ustoz 1–5 ball bilan baholaydi. Kurs oxirida eng ko\'p ball to\'plaganlar <b style="display:inline">sovg\'a yutadi</b> 🎁</span></div></div>' : '';
+  document.querySelectorAll('#days .day').forEach(el=>{ const g = scs.days[el.dataset.day]; if (open && g && g.score){ const t=document.createElement('span'); t.className='sc'; t.textContent='⭐ '+g.score+'/5'; el.insertBefore(t, el.lastElementChild); } });
   if (open && (current==='paid' || current==='home') && inTG) setTimeout(showTour, 400);
   const n = Object.values(done).filter(Boolean).length;
   $('#p-prog').textContent = open ? n+'/10 bajarildi' : '';
@@ -1142,6 +1161,7 @@ $('#days').addEventListener('click', e=>{
 });
 
 /* ================= KUN SAHIFASI (qadamlar + animatsiya) ================= */
+function scoresInfo(){ const st = store.get('refstats'); const sc = st && st.scores; return { total: (sc&&sc.total)||0, max: (sc&&sc.max)||50, days: (sc&&sc.days)||{} }; }
 let dayIdx = 0;
 function confetti(n){
   const box = document.createElement('div'); box.className='confetti';
@@ -1176,6 +1196,16 @@ function renderDay(animate){
       ? '<div class="dprog"><div class="bar"><i id="d-bar"></i></div><b id="d-pct">'+cnt+'/'+tot+'</b></div>'+stepsHtml+
         (links.length ? '<div class="dlinks">'+links.map(l=>'<button class="btn btn-soft" data-ext="'+esc(l[1])+'">🔗 '+esc(l[0])+'</button>').join('')+'</div>' : '')+
         '<div class="dres"><span class="ri">🎯</span><div><b>Kun natijasi</b><span>'+esc(d[2])+'</span></div></div>'+
+        (done ? (()=>{ const g = scoresInfo().days[i], sentL = (store.get('hwsent')||{})[i];
+            if (g && g.score) return '<div class="grade"><span class="st">'+'⭐'.repeat(g.score)+'☆'.repeat(5-g.score)+'</span><span><b>Ustoz bahosi: '+g.score+'/5</b></span></div>';
+            const waiting = (g && g.sent) || sentL;
+            return '<div class="hw" id="hw-box"><h3>📸 Uyga vazifa'+(waiting?' — yuborildi':'')+'</h3>'+
+              (waiting ? '<p>⏳ Rasmingiz ustozga yetib bordi, tez orada 1–5 ball bilan baholanadi. Kerak bo\'lsa, yangisini yuborishingiz mumkin.</p>'
+                       : '<p>Bajargan ishingizni rasmga oling (skrinshot yoki foto) va yuboring. Ustoz tekshirib, 1–5 ball qo\'yadi — ballar kurs oxirigacha jamlanadi va eng yaxshilar sovg\'a yutadi 🎁</p>')+
+              '<label class="pick"><input type="file" accept="image/*" class="vh" id="hw-file"><span id="hw-ph">📎 Vazifa rasmini tanlash</span><img id="hw-prev" hidden alt=""></label>'+
+              '<textarea id="hw-note" maxlength="300" placeholder="Izoh (ixtiyoriy): masalan, sertifikat havolasi"></textarea>'+
+              '<div class="err" id="hw-err"></div>'+
+              '<button class="btn btn-main" id="hw-send" disabled>'+(waiting?'Qayta yuborish':'Vazifani yuborish')+' 📤</button></div>'; })() : '')+
         (done ? '<div class="state st-ok" style="margin-top:6px"><h3>✅ Bu kun yakunlangan</h3><p>Barakalla! Keyingi kunga o\'ting.</p></div>' :
           '<button class="btn btn-main" id="d-finish"'+(cnt<tot?' style="opacity:.55"':'')+'>Kunni yakunlash 🎉</button>')+
         '<div style="display:flex;gap:8px;margin-top:10px">'+
@@ -1197,8 +1227,10 @@ $('#day-body').addEventListener('click', e=>{
     const done = store.get('done') || {}; done[dayIdx] = true; store.set('done', done);
     confetti(90); try{ tg && tg.HapticFeedback.notificationOccurred('success'); }catch(_){}
     const n = Object.values(done).filter(Boolean).length;
-    toast(n === CONFIG.DAYS.length ? 'Tabriklaymiz! 10 kunlik yo\'l yakunlandi 🎓' : (dayIdx+1)+'-kun yakunlandi! Barakalla 🌸');
-    renderDay(false); renderPaid(); return;
+    toast(n === CONFIG.DAYS.length ? 'Tabriklaymiz! 10 kun yakunlandi 🎓 Endi vazifa rasmini yuboring 📸' : 'Barakalla! Endi uyga vazifa rasmini yuboring 📸');
+    renderDay(false); renderPaid();
+    setTimeout(()=>{ const b=$('#hw-box'); if (b) b.scrollIntoView({behavior:'smooth', block:'center'}); }, 300);
+    return;
   }
   const st = e.target.closest('.stp'); if (!st || payInfo().status !== 'approved') return;
   const k = +st.dataset.k, sp = store.get('steps') || {}; sp[dayIdx] = sp[dayIdx] || []; sp[dayIdx][k] = !sp[dayIdx][k]; store.set('steps', sp);
@@ -1206,6 +1238,39 @@ $('#day-body').addEventListener('click', e=>{
   const g = CONFIG.GUIDES[dayIdx], cnt = g.steps.filter((_,j)=>sp[dayIdx][j]).length;
   renderDay(false);
   if (cnt === g.steps.length) { confetti(40); toast('Barcha qadamlar bajarildi! «Kunni yakunlash»ni bosing ✨'); }
+});
+
+/* ================= UYGA VAZIFA RASMI ================= */
+let hwData = '', hwBusy = false;
+$('#day-body').addEventListener('change', async e=>{
+  if (e.target.id !== 'hw-file') return;
+  const f = e.target.files && e.target.files[0]; e.target.value=''; if (!f) return;
+  $('#hw-err').textContent=''; $('#hw-ph').textContent='⏳ Rasm tayyorlanmoqda…'; $('#hw-send').disabled=true; hwData='';
+  try { hwData = await withTimeout(compressReceipt(f), 20000); }
+  catch(err){ if (f.size <= 4.5*1024*1024){ try { hwData = await fileToDataURL(f); } catch(_){} } }
+  if (!hwData){ $('#hw-ph').textContent='📎 Vazifa rasmini tanlash'; return $('#hw-err').textContent='Rasmni ochib bo\'lmadi. Skrinshot olib, o\'shani yuklang'; }
+  if (!/^data:image\//.test(hwData)) hwData = hwData.replace(/^data:[^;]*;/, 'data:image/jpeg;');
+  const pv=$('#hw-prev'); if (/^data:image\/(jpeg|png|webp|gif)/.test(hwData)){ pv.src=hwData; pv.hidden=false; }
+  $('#hw-ph').textContent='✅ Rasm tanlandi · boshqasini tanlash'; $('#hw-send').disabled=false; haptic();
+});
+$('#day-body').addEventListener('click', async e=>{
+  if (!e.target.closest('#hw-send') || !hwData || hwBusy) return;
+  hwBusy = true; const b=$('#hw-send'); b.disabled=true; b.textContent='Yuborilmoqda… ⏳'; $('#hw-err').textContent='';
+  const g = CONFIG.GUIDES[dayIdx], mine = (store.get('steps')||{})[dayIdx] || [];
+  const payload = { day: dayIdx, image: hwData, note: ($('#hw-note').value||'').trim(), steps: g.steps.filter((_,k)=>mine[k]).length, total: g.steps.length, pt: PT };
+  let r = await send('homework', payload);
+  if (!r.ok && r.error==='network') r = await send('homework', payload);
+  hwBusy = false;
+  if (!r.ok){
+    b.disabled=false; b.textContent='Vazifani yuborish 📤';
+    $('#hw-err').textContent = r.error==='graded' ? 'Bu kun allaqachon baholangan ✅' : r.error==='image' ? 'Rasm formati mos emas — skrinshot yuboring' : 'Yuborilmadi. Internetni tekshirib, qayta urinib ko\'ring';
+    try{ tg && tg.HapticFeedback.notificationOccurred('error'); }catch(_){}
+    return;
+  }
+  hwData=''; const s2 = store.get('hwsent') || {}; s2[dayIdx] = true; store.set('hwsent', s2);
+  confetti(50); try{ tg && tg.HapticFeedback.notificationOccurred('success'); }catch(_){}
+  toast('Vazifa ustozga yuborildi! Baho tez orada 💌');
+  renderDay(false); loadRefs();
 });
 
 /* ================= XUSH KELIBSIZ TURI (pullik ochilganda bir marta) ================= */
@@ -1222,7 +1287,8 @@ function showTour(){
       '<div style="animation-delay:.25s"><span>🎥</span>Jonli dars va savollar — yopiq Telegram guruhda</div>'+
       '<div style="animation-delay:.4s"><span>👣</span>Kunni oching va qadamlarni birma-bir bajaring</div>'+
       '<div style="animation-delay:.55s"><span>✅</span>Har bir qadamni belgilang — progress o\'sib boradi</div>'+
-      '<div style="animation-delay:.7s"><span>🏅</span>Sertifikatlarni yuklab oling va LinkedIn\'ga qo\'shing</div></div></div>'+
+      '<div style="animation-delay:.7s"><span>📸</span>Uyga vazifa rasmini yuboring — ustoz 1–5 ball qo\'yadi</div>'+
+      '<div style="animation-delay:.85s"><span>🏆</span>Ballar jamlanadi — eng yaxshilar sovg\'a yutadi!</div></div></div>'+
     '<div class="slide"><div class="big">🚀</div><h2>Birinchi qadam</h2><p>Avval kurs guruhiga qo\'shiling — darslar va havolalar o\'sha yerda. Keyin 1-kunni ochib, qadamlarni boshlang.</p>'+
       (p.invite ? '<button class="btn btn-gold" id="t-join">Kurs guruhiga qo\'shilish</button>' : '')+
       '<button class="btn btn-main mt" id="t-day1">1-kunni ochish ›</button></div>'+
@@ -1409,6 +1475,7 @@ async function loadRefs(){
     const r = await send('me', PT ? { pt: PT } : {});
     if (r && r.ok && r.stats){
       store.set('refstats', r); renderRefs(r); renderPaid();
+      if (current === 'day') renderDay(false);
       if (before !== 'approved' && r.pay && r.pay.status === 'approved'){
         try { tg && tg.HapticFeedback.notificationOccurred('success'); } catch(e){}
         toast('🎉 To\'lov tasdiqlandi! Kurs ochildi');
