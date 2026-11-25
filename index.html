@@ -381,6 +381,20 @@ textarea.inp{min-height:110px;resize:vertical}
 .dres b{display:block;color:#2f5c45;font-size:14px}
 .dres span{font-size:12.5px;color:#4d7a63}
 .dlinks{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.dmat{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:12px;margin:0 0 12px;box-shadow:0 6px 18px rgba(158,84,104,.08);animation:fade .5s .3s both}
+.dmat .dmt{font-size:12px;font-weight:800;letter-spacing:.4px;color:var(--muted);text-transform:uppercase;margin:0 2px 8px}
+.dmat .dmb{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dmat .btn{padding:12px 8px;font-size:13.5px;border-radius:14px;line-height:1.25;flex-direction:column;gap:3px}
+.dmat .btn small{font-size:10.5px;font-weight:600;opacity:.75}
+.dmat .btn.on{border-color:var(--rosegold);background:#FFF3F5}
+.dmat .pan{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.dmat .pan .sec{font-size:11.5px;font-weight:800;color:var(--muted);margin:4px 2px 0}
+.dmat .pan .row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:#FFF8F9;border:1px solid var(--line);border-radius:14px;padding:12px;font-size:14px;font-weight:700;color:var(--plum);cursor:pointer}
+.dmat .pan .row .go{margin-left:auto;color:var(--rosegold);font-size:16px}
+.dmat .pan .row.ppt{background:linear-gradient(135deg,#FFF3E0,#FFE8C2);border-color:#F1DFB8}
+.dmat .pan .emp{font-size:12.5px;color:var(--muted);padding:6px 4px;line-height:1.5}
+.dmat .lockline{font-size:12.5px;color:var(--muted);line-height:1.5;padding:2px}
+
 .locked-steps{position:relative}
 .locked-steps .steps{filter:blur(3.5px);pointer-events:none;user-select:none}
 .locked-steps .lk{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px}
@@ -1343,6 +1357,64 @@ function confetti(n){
 function openDay(i){
   dayIdx = i; renderDay(true); go('day');
 }
+/* ===== Dars materiallari: yopiq kanal + taqdimot va sertifikat saytlari =====
+   Havolalar ilova kodida emas — serverdan, faqat to'lov tasdiqlangan foydalanuvchiga olinadi (type:'res'). */
+const resCache = {}, matOpen = {};
+function matBlock(i, open, animate){
+  const an = animate ? '' : ' style="animation:none"';
+  if (!open) return '<div class="dmat"'+an+'><div class="dmt">📚 Dars materiallari</div><div class="lockline">🔒 Yopiq kanal, taqdimot va sertifikat saytlari kursga yozilgach ochiladi.</div></div>';
+  const r = resCache[i], on = !!matOpen[i];
+  let pan = '';
+  if (on){
+    if (!r) pan = '<div class="pan"><div class="emp">⏳ Yuklanmoqda…</div></div>';
+    else {
+      const rows = [];
+      if (r.ppt) rows.push('<button class="row ppt" data-mu="ppt">📊 <span>Bugungi dars taqdimoti</span><span class="go">↗</span></button>');
+      if ((r.sites||[]).length){
+        rows.push('<div class="sec">SERTIFIKAT UCHUN SAYTLAR</div>');
+        r.sites.forEach((x,k)=>rows.push('<button class="row" data-mu="s'+k+'">🌐 <span>'+esc(x.n)+'</span><span class="go">↗</span></button>'));
+      }
+      pan = '<div class="pan">'+(rows.length ? rows.join('') : '<div class="emp">Bu kun uchun taqdimot va saytlar tez orada qo\'shiladi ✨</div>')+'</div>';
+    }
+  }
+  return '<div class="dmat"'+an+'><div class="dmt">📚 Dars materiallari</div><div class="dmb">'+
+    '<button class="btn btn-soft" data-mat="ch">🔒 Yopiq kanal<small>darslar shu yerda</small></button>'+
+    '<button class="btn btn-soft'+(on?' on':'')+'" data-mat="res">📊 Taqdimot va saytlar<small>bugungi dars uchun</small></button></div>'+pan+'</div>';
+}
+async function loadRes(i, force){
+  if (resCache[i] && !force) return resCache[i];
+  const r = await send('res', { day:i, pt:PT });
+  if (r && r.demo) { resCache[i] = { channel:'', ppt:'', sites:[] }; return resCache[i]; }
+  if (r && r.ok) { resCache[i] = { channel:r.channel||'', ppt:r.ppt||'', sites:r.sites||[] }; return resCache[i]; }
+  return null;
+}
+function openMat(url){
+  try { if (tg && inTG && /^https:\/\/t\.me\//i.test(url) && tg.openTelegramLink) return tg.openTelegramLink(url); } catch(e){}
+  openExt(url);
+}
+async function onMat(e){
+  const b = e.target.closest('[data-mat],[data-mu]'); if (!b) return false;
+  const i = dayIdx; haptic();
+  if (b.dataset.mat === 'res'){
+    matOpen[i] = !matOpen[i]; renderDay(false);
+    if (matOpen[i] && !resCache[i]){
+      const r = await loadRes(i);
+      if (!r){ matOpen[i] = false; toast('Yuklab bo\'lmadi. Internetni tekshirib, qayta urining'); }
+      if (dayIdx === i && current === 'day') renderDay(false);
+    }
+    return true;
+  }
+  if (b.dataset.mat === 'ch'){
+    const r = await loadRes(i, true);
+    if (!r) { toast('Yuklab bo\'lmadi. Qayta urinib ko\'ring'); return true; }
+    if (r.channel) openMat(r.channel); else toast('Yopiq kanal havolasi tez orada qo\'shiladi');
+    return true;
+  }
+  const mu = b.dataset.mu, r = resCache[i]; if (!r) return true;
+  if (mu === 'ppt') { if (r.ppt) openMat(r.ppt); }
+  else { const x = r.sites[+mu.slice(1)]; if (x && x.u) openMat(x.u); }
+  return true;
+}
 function renderDay(animate){
   const i = dayIdx, d = CONFIG.DAYS[i], g = (CONFIG.GUIDES||[])[i] || { icon:'📘', why:'', steps:[], links:[] };
   const open = payInfo().status === 'approved';
@@ -1353,11 +1425,13 @@ function renderDay(animate){
     '<div class="stp'+(mine[k]?' on':'')+(open && k===curIdx?' cur':'')+'" data-k="'+k+'" style="animation-delay:'+(animate? (0.25+k*0.09).toFixed(2) : 0)+'s">'+
     '<span class="sn">'+(mine[k]?'✓':(k+1))+'</span><div class="tx">'+st[0]+(st[1]?'<small>'+esc(st[1])+'</small>':'')+'</div><span class="ck">'+(mine[k]?'✓':'')+'</span></div>').join('')+'</div>';
   const links = (g.links||[]).filter(l=>l && l[1]);
+  const matHtml = matBlock(i, open, animate);
   $('#day-body').innerHTML =
     '<div class="dhero"><span class="ico">'+g.icon+'</span><div class="num"><div style="text-align:center"><small>KUN</small><b>'+(i+1)+'</b></div></div>'+
       '<h2>'+esc(d[0])+'</h2><p>'+esc(d[1])+'</p>'+
       '<div class="tags"><span>⏱ ~1 soat</span><span>👣 '+tot+' qadam</span>'+(d[3]?'<span>🏅 +'+d[3]+' sertifikat</span>':'')+'</div></div>'+
     (g.why ? '<div class="why"><span>💡</span><span>'+esc(g.why)+'</span></div>' : '')+
+    matHtml+
     (open
       ? '<div class="dprog"><div class="bar"><i id="d-bar"></i></div><b id="d-pct">'+cnt+'/'+tot+'</b></div>'+stepsHtml+
         (links.length ? '<div class="dlinks">'+links.map(l=>'<button class="btn btn-soft" data-ext="'+esc(l[1])+'">🔗 '+esc(l[0])+'</button>').join('')+'</div>' : '')+
@@ -1382,6 +1456,7 @@ function renderDay(animate){
   requestAnimationFrame(()=>{ const b=$('#d-bar'); if (b) b.style.width = pct+'%'; });
 }
 $('#day-body').addEventListener('click', e=>{
+  if (e.target.closest('[data-mat],[data-mu]')){ onMat(e); return; }
   const ext = e.target.closest('[data-ext]'); if (ext){ haptic(); return openExt(ext.dataset.ext); }
   if (e.target.closest('#d-prev')){ haptic(); dayIdx--; renderDay(true); window.scrollTo(0,0); return; }
   if (e.target.closest('#d-next')){ haptic(); dayIdx++; renderDay(true); window.scrollTo(0,0); return; }
