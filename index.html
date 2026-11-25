@@ -393,6 +393,11 @@ textarea.inp{min-height:110px;resize:vertical}
 .dmat .pan .row .go{margin-left:auto;color:var(--rosegold);font-size:16px}
 .dmat .pan .row.ppt{background:linear-gradient(135deg,#FFF3E0,#FFE8C2);border-color:#F1DFB8}
 .dmat .pan .emp{font-size:12.5px;color:var(--muted);padding:6px 4px;line-height:1.5}
+.day.closed{opacity:.6}
+.closed-card{text-align:center;padding:22px 16px;background:#FFF8EC;border:1px solid #F1DFB8;border-radius:18px;margin:6px 0}
+.closed-card h3{margin:6px 0;color:var(--plum);font-size:17px}
+.closed-card p{margin:4px 0;font-size:13px;line-height:1.5;color:#6b4a12}
+.closed-card .op{font-size:12px;color:var(--muted)}
 .dmat .lockline{font-size:12.5px;color:var(--muted);line-height:1.5;padding:2px}
 
 .locked-steps{position:relative}
@@ -1323,9 +1328,10 @@ function renderPaid(){
   $('#days').innerHTML = CONFIG.DAYS.map((d,i)=>{
     const isDone = open && done[i];
     const g = (CONFIG.GUIDES||[])[i], tot = g ? g.steps.length : 0, cnt = (sp[i]||[]).filter(Boolean).length;
-    const bar = open && tot ? '<span class="mini"><i style="width:'+Math.round(cnt/tot*100)+'%"></i></span>' : '';
-    return '<div class="day open'+(isDone?' done':'')+'" data-day="'+i+'"><div class="d"><small>KUN</small><b>'+(i+1)+'</b></div>'+
-      '<div class="t">'+esc(d[0])+'<span>'+esc(d[1])+'</span><em>✓ Natija: '+esc(d[2])+'</em>'+bar+'</div>'+(d[3]?'<span class="cert">+'+d[3]+' sertifikat</span>':'')+(open?(isDone?'<span class="chk">✓</span>':'<span class="go">›</span>'):'<span class="lock">🔒</span>')+'</div>';
+    const bar = open && tot && dayOpen(i) ? '<span class="mini"><i style="width:'+Math.round(cnt/tot*100)+'%"></i></span>' : '';
+    const dc = open && !dayOpen(i);
+    return '<div class="day open'+(isDone?' done':'')+(dc?' closed':'')+'" data-day="'+i+'"><div class="d"><small>KUN</small><b>'+(i+1)+'</b></div>'+
+      '<div class="t">'+esc(d[0])+'<span>'+esc(d[1])+'</span><em>✓ Natija: '+esc(d[2])+'</em>'+bar+'</div>'+(d[3]?'<span class="cert">+'+d[3]+' sertifikat</span>':'')+(open&&!dc?(isDone?'<span class="chk">✓</span>':'<span class="go">›</span>'):'<span class="lock">🔒</span>')+'</div>';
   }).join('');
   $('#p-certs').textContent = CONFIG.DAYS.reduce((a,d)=>a+(d[3]||0),0);
   const scs = scoresInfo();
@@ -1355,7 +1361,24 @@ function confetti(n){
   document.body.appendChild(box); setTimeout(()=>box.remove(), 3600);
 }
 function openDay(i){
+  if (payInfo().status === 'approved' && !dayOpen(i)){ toast('🔒 '+(i+1)+'-kun hali ochilmagan. Ustoz ochganda xabar keladi'); try{ tg && tg.HapticFeedback.notificationOccurred('warning'); }catch(e){} return; }
   dayIdx = i; renderDay(true); go('day');
+}
+/* Kunni ustoz (admin) qo'lda ochadi: ochiq kunlar serverdan keladi (me.open). Yopiq kunning qadamlari ko'rinmaydi. */
+function dayOpen(i){
+  if (!inTG) return true;                       // faqat brauzerda ko'rib chiqish uchun
+  const st = store.get('refstats'), o = st && st.open;
+  return Array.isArray(o) ? o.includes(i) : i === 0;
+}
+function closedDayHtml(i, d, g){
+  const st = store.get('refstats'), o = (st && Array.isArray(st.open)) ? st.open.slice().sort((a,b)=>a-b) : [];
+  return '<div class="dhero"><span class="ico">'+g.icon+'</span><div class="num"><div style="text-align:center"><small>KUN</small><b>'+(i+1)+'</b></div></div><h2>'+esc(d[0])+'</h2><p>'+esc(d[1])+'</p></div>'+
+    '<div class="state closed-card"><div style="font-size:34px">🔒</div><h3>'+(i+1)+'-kun hali ochilmagan</h3>'+
+    '<p>Ustoz kunni ochganda sizga Telegram orqali xabar keladi 🔔</p>'+
+    (o.length ? '<p class="op">Hozir ochiq: '+o.map(x=>(x+1)+'-kun').join(', ')+'</p>' : '')+'</div>'+
+    '<div style="display:flex;gap:8px;margin-top:10px">'+
+      (i>0?'<button class="btn btn-soft" id="d-prev" style="flex:1">‹ '+i+'-kun</button>':'')+
+      (i<CONFIG.DAYS.length-1?'<button class="btn btn-soft" id="d-next" style="flex:1">'+(i+2)+'-kun ›</button>':'')+'</div>';
 }
 /* ===== Dars materiallari: yopiq kanal + taqdimot va sertifikat saytlari =====
    Havolalar ilova kodida emas — serverdan, faqat to'lov tasdiqlangan foydalanuvchiga olinadi (type:'res'). */
@@ -1418,6 +1441,7 @@ async function onMat(e){
 function renderDay(animate){
   const i = dayIdx, d = CONFIG.DAYS[i], g = (CONFIG.GUIDES||[])[i] || { icon:'📘', why:'', steps:[], links:[] };
   const open = payInfo().status === 'approved';
+  if (open && !dayOpen(i)){ $('#day-body').innerHTML = closedDayHtml(i, d, g); return; }
   const sp = store.get('steps') || {}, mine = sp[i] || [], done = (store.get('done')||{})[i];
   const cnt = g.steps.filter((_,k)=>mine[k]).length, tot = g.steps.length, pct = tot ? Math.round(cnt/tot*100) : 0;
   const curIdx = g.steps.findIndex((_,k)=>!mine[k]);
