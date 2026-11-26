@@ -126,6 +126,14 @@ html.lite .in-glow{animation:none!important}
 @media (prefers-reduced-motion:reduce){#intro *,.rl-wrap *{animation-duration:.01s!important;animation-iteration-count:1!important}}
 /* ---------- umumiy ---------- */
 .wrap{max-width:520px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px 110px}
+/* ---------- sahifa o'tish animatsiyasi (hub uslubi) ---------- */
+#fx{position:fixed;inset:0;z-index:9999;pointer-events:none;overflow:hidden}
+#fx .fxh{position:absolute;left:0;top:0;border-radius:50%;background:radial-gradient(circle at 62% 50%,#FBE6E8 0%,#F6D3D8 30%,#E3A3AE 62%,#B76E79 100%);box-shadow:inset 0 0 0 12px rgba(255,255,255,.22);will-change:transform;backface-visibility:hidden}
+#fx .fxd{position:absolute;inset:25%;border-radius:50%;border:2px dashed rgba(255,255,255,.75)}
+#fx .fxi{position:absolute;inset:10%;border-radius:50%;background:linear-gradient(160deg,rgba(255,255,255,.28),rgba(183,110,121,.0) 60%)}
+#fx .fxs{position:absolute;left:0;top:0;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:linear-gradient(180deg,#FBE6E8,#B76E79);box-shadow:0 6px 14px rgba(82,35,54,.3),inset 0 2px 0 rgba(255,255,255,.55);will-change:transform}
+#fx .fxc{position:absolute;left:50%;top:50%;width:92px;height:92px;border-radius:50%;background:#fff;border:6px solid #C9A24D;display:grid;place-items:center;box-shadow:0 12px 30px rgba(82,35,54,.32);transform:translate(-50%,-50%) scale(0);opacity:0}
+#fx .fxc span{font-size:40px;line-height:1}
 .screen{display:none;animation:fade .35s ease}
 .screen.on{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -1153,7 +1161,7 @@ function normPhone(p){ let d=String(p||'').replace(/\D/g,''); if(d.length===9) d
 /* ================= EKRANLAR ================= */
 let current = '', prevScreen = 'home';
 const order = ['home','free','paid','me'];
-function go(name){
+function goNow(name){
   if (name==='oferta' && current && current!=='oferta') prevScreen = current;
   document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on', s.id==='s-'+name));
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on', t.dataset.go===((name==='pay'||name==='day')?'paid':name)));
@@ -1164,6 +1172,54 @@ function go(name){
   if (name==='me') renderMe();
   try { if (tg && tg.BackButton){ (name==='home'||name==='reg') ? tg.BackButton.hide() : tg.BackButton.show(); } } catch(e){}
 }
+/* ================= SAHIFA O'TISH ANIMATSIYASI =================
+   Videodagi "hub" uslubi: chetdan katta doira o'sib ekranni qoplaydi, shu paytda sahifa almashadi,
+   markazda ikonka doirasi chiqadi, so'ng doira ketib yangi sahifani ochadi. Orqaga qaytganda teskari yo'nalishda. */
+const FX_ICON = {home:'🏠',free:'🎁',quiz:'✨',paid:'🎓',pay:'💳',me:'👤',oferta:'📄',day:'📘',reg:'📝'};
+const FX_RING = ['#C9A24D','#7A4A5C','#B76E79','#E08A3C','#5E9C7A'];
+const FX_SATS = [['🎓',-38],['📜',-19],['🌍',0],['💼',19],['⭐',38]];
+const FX_DEPTH = {reg:0,home:0,free:0,paid:0,me:0,quiz:1,pay:1,day:1,oferta:1};
+let fxBusy = false, fxN = 0;
+function fxOn(){
+  const h = document.documentElement;
+  return !!h.animate && !h.classList.contains('lite') && !(window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches);
+}
+function pageFx(name, swap){
+  if (fxBusy || !current || name===current || !fxOn()){ swap(); return; }
+  const oi = order.indexOf(current), ni = order.indexOf(name);
+  const dir = ((FX_DEPTH[name]||0) < (FX_DEPTH[current]||0) || (oi>=0 && ni>=0 && ni<oi)) ? -1 : 1;
+  fxBusy = true;
+  const vw = innerWidth, vh = innerHeight;
+  const R = Math.ceil(Math.hypot(vw, vh/2) * 1.06), cx0 = dir>0 ? 0 : vw, cy = vh/2;
+  const ico = name==='day' ? (((CONFIG.GUIDES||[])[dayIdx]||{}).icon || '📘') : (FX_ICON[name]||'✨');
+  const el = document.createElement('div'); el.id = 'fx';
+  el.innerHTML = '<i class="fxh" style="width:'+(2*R)+'px;height:'+(2*R)+'px"><i class="fxi"></i><i class="fxd"></i></i>'
+    + FX_SATS.map(x=>'<b class="fxs">'+x[0]+'</b>').join('')
+    + '<div class="fxc" style="border-color:'+FX_RING[(fxN++)%FX_RING.length]+'"><span>'+ico+'</span></div>';
+  document.body.appendChild(el);
+  const hub = el.querySelector('.fxh'), sats = el.querySelectorAll('.fxs'), sel = el.querySelector('.fxc');
+  const S0 = .04, T1 = 300, HOLD = 100, T2 = 340;
+  const hubT = (sh, s) => 'translate('+(cx0 - R + sh)+'px,'+(cy - R)+'px) scale('+s+')';
+  const satT = (i, sh, s) => { const a = FX_SATS[i][1]*Math.PI/180; return 'translate('+(cx0 + sh + dir*R*s*Math.cos(a) - 22)+'px,'+(cy + R*s*Math.sin(a) - 22)+'px)'; };
+  hub.style.transform = hubT(0, S0);
+  sats.forEach((x,i)=>{ x.style.transform = satT(i, 0, S0); });
+  const e1 = 'cubic-bezier(.55,0,.25,1)', e2 = 'cubic-bezier(.45,0,.2,1)', shift = dir*(vw + R + 60);
+  hub.animate([{transform:hubT(0,S0)},{transform:hubT(0,1)}], {duration:T1, easing:e1, fill:'forwards'});
+  sats.forEach((x,i)=> x.animate([{transform:satT(i,0,S0)},{transform:satT(i,0,1)}], {duration:T1, easing:e1, fill:'forwards'}));
+  const done = ()=>{ try{ el.remove(); }catch(e){} fxBusy = false; };
+  const guard = setTimeout(done, 2000);
+  setTimeout(()=>{
+    try{ swap(); }catch(e){ console.error(e); }
+    sel.animate([{transform:'translate(-50%,-50%) scale(0)',opacity:0},{transform:'translate(-50%,-50%) scale(1.15)',opacity:1,offset:.6},{transform:'translate(-50%,-50%) scale(1)',opacity:1}], {duration:260, easing:'ease-out', fill:'forwards'});
+    setTimeout(()=>{
+      hub.animate([{transform:hubT(0,1)},{transform:hubT(shift,1)}], {duration:T2, easing:e2, fill:'forwards'});
+      sats.forEach((x,i)=> x.animate([{transform:satT(i,0,1)},{transform:satT(i,shift,1)}], {duration:T2, easing:e2, fill:'forwards'}));
+      sel.animate([{transform:'translate(-50%,-50%) scale(1)',opacity:1},{transform:'translate(-50%,-50%) scale(.7)',opacity:0}], {duration:220, easing:'ease-in', fill:'forwards'});
+      setTimeout(()=>{ clearTimeout(guard); done(); }, T2 + 30);
+    }, HOLD);
+  }, T1);
+}
+function go(name){ pageFx(name, ()=>goNow(name)); }
 document.addEventListener('click', e=>{ const b=e.target.closest('[data-go]'); if(b){ if(b.tagName==='A') e.preventDefault(); haptic(); go(b.dataset.go); } });
 document.getElementById('of-back').addEventListener('click', ()=>go(prevScreen||'home'));
 function showDoc(k){
@@ -1392,7 +1448,7 @@ function matBlock(i, open, animate){
     if (!r) pan = '<div class="pan"><div class="emp">⏳ Yuklanmoqda…</div></div>';
     else {
       const rows = [];
-      if (r.ppt) rows.push('<button class="row ppt" data-mu="ppt">📊 <span>Bugungi dars taqdimoti</span><span class="go">↗</span></button>');
+      if (r.ppt) rows.push('<button class="row ppt" data-mu="ppt">📊 <span>'+esc(r.pptTitle||'Bugungi dars taqdimoti')+'</span><span class="go">↗</span></button>');
       if ((r.sites||[]).length){
         rows.push('<div class="sec">SERTIFIKAT UCHUN SAYTLAR</div>');
         r.sites.forEach((x,k)=>rows.push('<button class="row" data-mu="s'+k+'">🌐 <span>'+esc(x.n)+'</span><span class="go">↗</span></button>'));
@@ -1408,7 +1464,7 @@ async function loadRes(i, force){
   if (resCache[i] && !force) return resCache[i];
   const r = await send('res', { day:i, pt:PT });
   if (r && r.demo) { resCache[i] = { channel:'', ppt:'', sites:[] }; return resCache[i]; }
-  if (r && r.ok) { resCache[i] = { channel:r.channel||'', ppt:r.ppt||'', sites:r.sites||[] }; return resCache[i]; }
+  if (r && r.ok) { resCache[i] = { channel:r.channel||'', ppt:r.ppt||'', pptTitle:r.pptTitle||'', sites:r.sites||[] }; return resCache[i]; }
   return null;
 }
 function openMat(url){
